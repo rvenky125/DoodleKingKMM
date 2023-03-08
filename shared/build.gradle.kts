@@ -1,5 +1,3 @@
-import org.jetbrains.compose.compose
-
 plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
@@ -14,7 +12,7 @@ kotlin {
     android {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "1.8"
+                jvmTarget = "11"
             }
         }
     }
@@ -42,6 +40,10 @@ kotlin {
                 api(compose.material3)
                 api(compose.materialIconsExtended)
                 api(compose.animation)
+                api(compose.animationGraphics)
+                api(compose.ui)
+
+                api("moe.tlaster:precompose:1.3.14")
             }
         }
         val commonTest by getting {
