@@ -1,4 +1,4 @@
-package com.famas.doodlekingkmm.core.canvas
+package com.famas.doodlekingkmm.presentation.components.canvas
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,7 +22,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 fun CanvasBox(
     canvasController: CanvasController,
     modifier: Modifier = Modifier.fillMaxSize(),
-    defaultBackgroundColor: Color = MaterialTheme.colorScheme.background,
+    defaultBackgroundColor: Color = Color.White,
 ) {
     Canvas(modifier = modifier
         .background(canvasController.bgColor ?: defaultBackgroundColor)

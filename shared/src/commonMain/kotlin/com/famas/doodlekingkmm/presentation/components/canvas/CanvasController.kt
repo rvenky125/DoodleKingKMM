@@ -1,4 +1,4 @@
-package com.famas.doodlekingkmm.core.canvas
+package com.famas.doodlekingkmm.presentation.components.canvas
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -20,7 +20,7 @@ class CanvasController {
     var strokeWidth by mutableStateOf(10f)
         private set
 
-    var color by mutableStateOf(Color.Red)
+    var color by mutableStateOf(Color.Black)
         private set
 
     var bgColor by mutableStateOf<Color?>(null)

@@ -1,4 +1,4 @@
-package com.famas.doodlekingkmm.core.canvas
+package com.famas.doodlekingkmm.presentation.components.canvas
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset
