@@ -6,19 +6,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasBox
-import moe.tlaster.precompose.ui.viewModel
 
-@Composable
-internal fun GameScreen() {
-    val viewModel = viewModel {
-        GameScreenVM()
-    }
+class GameScreen: Screen {
 
-    Column {
-        CanvasBox(
-            canvasController = viewModel.canvasController,
-            modifier = Modifier.fillMaxWidth().height(400.dp)
-        )
+    @Composable
+    override fun Content() {
+        val viewModel = rememberScreenModel { GameScreenVM() }
+
+        Column {
+            CanvasBox(
+                canvasController = viewModel.canvasController,
+                modifier = Modifier.fillMaxWidth().height(400.dp)
+            )
+        }
     }
 }

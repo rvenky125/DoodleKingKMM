@@ -47,13 +47,18 @@ kotlin {
                 api(compose.animationGraphics)
                 api(compose.ui)
 
-                api("moe.tlaster:precompose:1.3.14")
-                implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation("io.ktor:ktor-client-logging:$ktorVersion")
-                implementation("io.ktor:ktor-client-websockets:$ktorVersion")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-                implementation(Deps.Koin.core)
+                api("io.ktor:ktor-client-core:$ktorVersion")
+                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+                api("io.ktor:ktor-client-logging:$ktorVersion")
+                api("io.ktor:ktor-client-websockets:$ktorVersion")
+                api("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                api("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+                api("io.ktor:ktor-client-cio:$ktorVersion")
+                api(Deps.Koin.core)
+
+                api(Deps.Voyager.navigator)
+                api(Deps.Voyager.transitions)
+                api(Deps.Voyager.koin)
             }
         }
         val commonTest by getting {
@@ -63,8 +68,8 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation(Deps.Koin.android)
+                api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
             }
         }
         val androidUnitTest by getting
