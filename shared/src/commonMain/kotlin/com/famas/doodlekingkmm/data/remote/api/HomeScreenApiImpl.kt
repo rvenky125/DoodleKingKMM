@@ -7,12 +7,16 @@ import com.famas.doodlekingkmm.data.remote.requests.CreateRoomRequest
 import com.famas.doodlekingkmm.data.remote.requests.JoinRoomRequest
 import com.famas.doodlekingkmm.data.remote.responses.BasicApiResponse
 import com.famas.doodlekingkmm.data.remote.responses.RoomResponse
+import io.github.aakira.napier.Napier
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 
 class HomeScreenApiImpl(private val httpClient: HttpClient): HomeScreenApi {
     override suspend fun createRoom(request: CreateRoomRequest): BasicApiResponse<Unit> {
+        Napier.d(tag = "myTag") {
+            "Create room request: $request"
+        }
         return httpClient.post(CREATE_ROOM_ROUTE) {
             setBody(request)
         }.body()

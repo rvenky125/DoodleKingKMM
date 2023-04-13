@@ -42,6 +42,7 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material3)
+                api(compose.material)
                 api(compose.materialIconsExtended)
                 api(compose.animation)
                 api(compose.animationGraphics)
@@ -59,6 +60,7 @@ kotlin {
                 api(Deps.Voyager.navigator)
                 api(Deps.Voyager.transitions)
                 api(Deps.Voyager.koin)
+                implementation(Deps.Napier.napier)
             }
         }
         val commonTest by getting {

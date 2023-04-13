@@ -1,5 +1,6 @@
 package com.famas.doodlekingkmm.di
 
+import com.famas.doodlekingkmm.core.util.Constants
 import com.famas.doodlekingkmm.data.models.*
 import com.famas.doodlekingkmm.data.repositories.GameScreenRepoImpl
 import com.famas.doodlekingkmm.data.repositories.HomeScreenRepoImpl
@@ -12,6 +13,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.websocket.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -106,7 +108,8 @@ val json = Json {
 
 val httpClient = HttpClient(CIO) {
     defaultRequest {
-        url("http://192.168.1.4:8080/")
+        url(Constants.BASE_URL)
+        contentType(ContentType.Application.Json)
     }
 
     install(Logging) {
