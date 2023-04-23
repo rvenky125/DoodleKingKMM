@@ -8,7 +8,7 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonClassDiscriminator("type")
-abstract class BaseModel
+sealed class BaseModel
 
 const val TYPE_CHAT_MESSAGE = "TYPE_CHAT_MESSAGE"
 const val TYPE_DRAW_DATA = "TYPE_DRAW_DATA"

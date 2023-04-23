@@ -86,7 +86,9 @@ val mainModule = module {
 }
 
 val json = Json {
-    ignoreUnknownKeys = true
+//    ignoreUnknownKeys = true
+    isLenient = true
+    prettyPrint = true
     serializersModule = SerializersModule {
         polymorphic(BaseModel::class) {
             subclass(JoinRoom::class, JoinRoom.serializer())

@@ -5,11 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
+import cafe.adriel.voyager.navigator.Navigator
 import com.famas.doodlekingkmm.data.remote.requests.CreateRoomRequest
 import com.famas.doodlekingkmm.data.remote.requests.JoinRoomRequest
 import com.famas.doodlekingkmm.data.remote.responses.RoomResponse
 import com.famas.doodlekingkmm.domain.Response
 import com.famas.doodlekingkmm.domain.repositories.HomeScreenRepo
+import com.famas.doodlekingkmm.presentation.screen_game.GameScreen
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -27,8 +29,8 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
                 HomeScreenEvent.CreateRoom -> {
                     createRoom()
                 }
-                is HomeScreenEvent.JoinRoom -> {
-                    onJoinRoom(event.roomResponse)
+                is HomeScreenEvent.JoinRoomEvent -> {
+                    onJoinRoom(event.roomResponse, navigator = event.navigator)
                 }
                 is HomeScreenEvent.OnChangeRoomName -> {
                     state = state.copy(roomName = event.value)
@@ -38,6 +40,10 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
                 }
                 is HomeScreenEvent.OnChangeRoomCount -> {
                     state = state.copy(maxPlayers = event.count)
+                }
+
+                HomeScreenEvent.Refresh -> {
+                    syncRooms()
                 }
             }
         }
@@ -57,13 +63,12 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
         }.launchIn(coroutineScope)
     }
 
-    private fun onJoinRoom(room: RoomResponse) {
+    private fun onJoinRoom(room: RoomResponse, navigator: Navigator?) {
         homeScreenRepo.joinRoom(JoinRoomRequest(state.username, room.roomId)).onEach { response ->
             when (response) {
                 is Response.Loading -> state = state.copy(loading = response.isLoading)
                 is Response.Success -> {
-                    //TODO: Need to connect to game session
-                    _message.emit("Need to connect to game session")
+                    navigator?.push(GameScreen(roomId = room.roomId))
                 }
                 is Response.Failure -> {
                     _message.emit(response.message)

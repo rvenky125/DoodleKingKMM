@@ -61,6 +61,7 @@ kotlin {
                 api(Deps.Voyager.transitions)
                 api(Deps.Voyager.koin)
                 implementation(Deps.Napier.napier)
+                implementation("com.benasher44:uuid:0.7.0")
             }
         }
         val commonTest by getting {

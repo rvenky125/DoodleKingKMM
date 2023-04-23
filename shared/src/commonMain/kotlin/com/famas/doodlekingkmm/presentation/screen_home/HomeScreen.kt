@@ -1,10 +1,5 @@
 package com.famas.doodlekingkmm.presentation.screen_home
 
-import androidx.compose.foundation.Indication
-import androidx.compose.foundation.IndicationInstance
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,9 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -34,7 +26,6 @@ import androidx.compose.material.*
 import androidx.compose.material.FabPosition
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -43,7 +34,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import com.famas.doodlekingkmm.presentation.components.NumberPicker
-import io.github.aakira.napier.Napier
+import com.famas.doodlekingkmm.presentation.screen_game.GameScreenEvent
 
 class HomeScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -68,7 +59,6 @@ class HomeScreen : Screen {
 
         LaunchedEffect(Unit) {
             homeScreenModel.message.collectLatest {
-
                 if (it.isNotBlank()) {
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(it)
@@ -145,9 +135,18 @@ class HomeScreen : Screen {
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                 }
+
+                item {
+                    androidx.compose.material.Button(onClick = {
+                        homeScreenModel.onEvent(HomeScreenEvent.Refresh)
+                    }) {
+                        androidx.compose.material.Text("Refresh")
+                    }
+                }
+
                 items(state.rooms) { room ->
                     Card(onClick = {
-                        homeScreenModel.onEvent(HomeScreenEvent.JoinRoom(room))
+                        homeScreenModel.onEvent(HomeScreenEvent.JoinRoomEvent(room, navigator))
                     }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                         Column(
                             modifier = Modifier.padding(

@@ -84,7 +84,7 @@ fun DoodleKingKmmTheme(
   }
 
   MaterialTheme(
-    colorScheme = colors,
+    colorScheme = LightColors,
     content = content
   )
 }
