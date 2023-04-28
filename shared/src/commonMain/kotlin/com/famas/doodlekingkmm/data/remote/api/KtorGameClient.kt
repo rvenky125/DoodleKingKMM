@@ -1,5 +1,6 @@
 package com.famas.doodlekingkmm.data.remote.api
 
+import com.famas.doodlekingkmm.core.util.Constants
 import com.famas.doodlekingkmm.data.models.BaseModel
 import com.famas.doodlekingkmm.di.json
 import io.github.aakira.napier.Napier
@@ -23,7 +24,7 @@ class KtorGameClient(
     override fun observeBaseModels(clientId: String): Flow<BaseModel> {
         return flow {
             webSocketSession = httpClient.webSocketSession {
-                url("ws://192.168.32.70:8080/ws/draw?client_id=$clientId")
+                url("${Constants.WEB_SOCKET_BASE_URL}ws/draw?client_id=$clientId")
             }
             val baseModelFlow = webSocketSession!!
                 .incoming
@@ -31,6 +32,7 @@ class KtorGameClient(
                 .filterIsInstance<Frame.Text>()
                 .mapNotNull {
                     val text = it.readText()
+                    Napier.d(tag = "myTag") { text }
 
                     if (text == "{}") {
                         return@mapNotNull null

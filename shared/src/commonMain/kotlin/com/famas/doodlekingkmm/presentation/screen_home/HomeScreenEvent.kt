@@ -7,9 +7,7 @@ sealed class HomeScreenEvent {
     data class JoinRoomEvent(val roomResponse: RoomResponse, val navigator: Navigator?): HomeScreenEvent()
     object CreateRoom: HomeScreenEvent()
     object SyncRooms: HomeScreenEvent()
-    object Refresh : HomeScreenEvent() {
-
-    }
+    object Refresh : HomeScreenEvent()
 
     data class OnChangeRoomName(val value: String): HomeScreenEvent()
     data class OnChangeRoomCount(val count: Int) : HomeScreenEvent()

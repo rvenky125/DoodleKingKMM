@@ -10,6 +10,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.benasher44.uuid.Uuid
 import com.famas.doodlekingkmm.data.models.Announcement
+import com.famas.doodlekingkmm.data.models.BaseModel
 import com.famas.doodlekingkmm.data.models.ChatMessage
 import com.famas.doodlekingkmm.data.models.ChosenWord
 import com.famas.doodlekingkmm.data.models.DisconnectRequest
@@ -27,6 +28,7 @@ import com.famas.doodlekingkmm.data.models.PlayerData
 import com.famas.doodlekingkmm.data.models.PlayerList
 import com.famas.doodlekingkmm.data.models.RoundDrawInfo
 import com.famas.doodlekingkmm.data.remote.api.GameClient
+import com.famas.doodlekingkmm.di.httpClient
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasController
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasData
 import com.famas.doodlekingkmm.presentation.components.canvas.PathWrapper
@@ -40,7 +42,12 @@ class GameScreenVM(
     private val gameClient: GameClient
 ) : ScreenModel {
     val canvasController = CanvasController()
+
     var roomId: String? = null
+    private val uuid = Uuid(0L, 0L).toString()
+
+    private val _gameScreenState = mutableStateOf(GameScreenState())
+    val gameScreenState: State<GameScreenState> = _gameScreenState
 
     fun onEvent(event: GameScreenEvent) {
         when (event) {
@@ -48,6 +55,19 @@ class GameScreenVM(
                 coroutineScope.launch {
                     roomId?.let {
                         gameClient.sendBaseModel(ChosenWord(event.word, it))
+                    }
+                }
+            }
+
+            is GameScreenEvent.OnChangeTextInputValue -> {
+                _gameScreenState.value = gameScreenState.value.copy(
+                    textInputValue = event.textInputValue
+                )
+            }
+            GameScreenEvent.OnSendMessage -> {
+                coroutineScope.launch {
+                    roomId?.let {
+                        gameClient.sendBaseModel(ChatMessage(uuid, it, gameScreenState.value.textInputValue, 0L))
                     }
                 }
             }
@@ -68,11 +88,6 @@ class GameScreenVM(
             )
         )
     }
-
-    private val uuid = Uuid(0L, 0L).toString()
-    private val _gameScreenState = mutableStateOf(GameScreenState())
-
-    val gameScreenState: State<GameScreenState> = _gameScreenState
 
     fun connectToRoom(roomId: String) {
         this.roomId = roomId
@@ -171,28 +186,32 @@ class GameScreenVM(
                         )
                     }
 
-                    is JoinRoom -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
-                    }
-
                     is NewWords -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            newWords = it
+                            newWords = it.newWords
                         )
                     }
 
                     is PhaseChange -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
+                        if (it.phase != null) {
+                            _gameScreenState.value = gameScreenState.value.copy(
+                                currentPhase = it.phase,
+                                totalTime = it.time,
+                                time = it.time,
+                                drawingPlayer = it.drawingPlayer
+                            )
+                        } else {
+                            _gameScreenState.value = gameScreenState.value.copy(
+                                time = it.time,
+                                drawingPlayer = it.drawingPlayer
+                            )
+                        }
                     }
 
                     is Ping -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
+                        coroutineScope.launch {
+                            gameClient.sendBaseModel(Ping())
+                        }
                     }
 
                     is PlayerData -> {
