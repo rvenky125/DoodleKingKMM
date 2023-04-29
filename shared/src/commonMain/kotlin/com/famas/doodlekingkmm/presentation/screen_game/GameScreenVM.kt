@@ -9,6 +9,8 @@ import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import com.benasher44.uuid.Uuid
+import com.famas.doodlekingkmm.core.util.Constants
+import com.famas.doodlekingkmm.core.util.settings
 import com.famas.doodlekingkmm.data.models.Announcement
 import com.famas.doodlekingkmm.data.models.BaseModel
 import com.famas.doodlekingkmm.data.models.ChatMessage
@@ -44,7 +46,7 @@ class GameScreenVM(
     val canvasController = CanvasController()
 
     var roomId: String? = null
-    private val uuid = Uuid(0L, 0L).toString()
+    private val uuid = Uuid(10L, 10L).toString()
 
     private val _gameScreenState = mutableStateOf(GameScreenState())
     val gameScreenState: State<GameScreenState> = _gameScreenState
@@ -91,48 +93,12 @@ class GameScreenVM(
 
     fun connectToRoom(roomId: String) {
         this.roomId = roomId
-        coroutineScope.launch {
-            delay(2000L)
-            gameClient.sendBaseModel(JoinRoom(GMTDate().timestamp.toString(), roomId))
-        }
-    }
-
-    init {
-        startConnection()
-
-        canvasController.pathList.asFlow().onEach { pathWrapper ->
-            roomId?.let { id ->
-                Napier.d {
-                    "Sending draw data BaseModel: ${
-                        DrawData(
-                            roomId = id,
-                            path = Path(
-                                points = pathWrapper.points.map { OffsetData(it.x, it.y) },
-                                stroke = pathWrapper.strokeWidth,
-                                color = pathWrapper.strokeColor.hashCode().toString()
-                            )
-                        )
-                    }"
-                }
-                gameClient.sendBaseModel(
-                    DrawData(
-                        roomId = id,
-                        path = Path(
-                            points = pathWrapper.points.map { OffsetData(it.x, it.y) },
-                            stroke = pathWrapper.strokeWidth,
-                            color = pathWrapper.strokeColor.hashCode().toString()
-                        )
-                    )
-                )
+        _gameScreenState.value.username?.let { user ->
+            coroutineScope.launch {
+                gameClient.sendBaseModel(JoinRoom(user, roomId))
             }
-        }.launchIn(coroutineScope)
-    }
-
-    override fun onDispose() {
-        super.onDispose()
-
-        coroutineScope.launch {
-            gameClient.close()
+        } ?: kotlin.run {
+            TODO() //Need navigate the user to previous screen
         }
     }
 
@@ -236,5 +202,49 @@ class GameScreenVM(
                 }
                 Napier.d { it.toString() }
             }.launchIn(coroutineScope)
+    }
+
+    init {
+        startConnection()
+
+        _gameScreenState.value = gameScreenState.value.copy(
+            username = settings.getStringOrNull(Constants.USERNAME_PREF_KEY)
+        )
+
+        canvasController.pathList.asFlow().onEach { pathWrapper ->
+            roomId?.let { id ->
+                Napier.d {
+                    "Sending draw data BaseModel: ${
+                        DrawData(
+                            roomId = id,
+                            path = Path(
+                                points = pathWrapper.points.map { OffsetData(it.x, it.y) },
+                                stroke = pathWrapper.strokeWidth,
+                                color = pathWrapper.strokeColor.hashCode().toString()
+                            )
+                        )
+                    }"
+                }
+                gameClient.sendBaseModel(
+                    DrawData(
+                        roomId = id,
+                        path = Path(
+                            points = pathWrapper.points.map { OffsetData(it.x, it.y) },
+                            stroke = pathWrapper.strokeWidth,
+                            color = pathWrapper.strokeColor.hashCode().toString()
+                        )
+                    )
+                )
+            }
+        }.launchIn(coroutineScope)
+    }
+
+    override fun onDispose() {
+        super.onDispose()
+
+        coroutineScope.launch {
+            gameClient.sendBaseModel(DisconnectRequest())
+            gameClient.close()
+        }
     }
 }

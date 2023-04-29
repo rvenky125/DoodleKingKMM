@@ -1,5 +1,7 @@
 package com.famas.doodlekingkmm.presentation.screen_game
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +20,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import com.famas.doodlekingkmm.data.models.Phase
 import com.famas.doodlekingkmm.data.remote.api.KtorGameClient
 import com.famas.doodlekingkmm.di.httpClient
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasBox
+import io.github.aakira.napier.Napier
 
 class GameScreen(
     private val roomId: String
@@ -41,8 +45,19 @@ class GameScreen(
             rememberScreenModel { GameScreenVM(KtorGameClient(httpClient = httpClient)) }
         val state = viewModel.gameScreenState.value
 
+        val animatedProgress = remember {
+            Animatable(1f)
+        }
+
+
         LaunchedEffect(Unit) {
             viewModel.connectToRoom(roomId)
+        }
+
+        LaunchedEffect(state.totalTime, state.time) {
+            if (state.totalTime != 0L || state.time != 0L) {
+                animatedProgress.animateTo(state.time.toFloat() / state.totalTime.toFloat(), tween(durationMillis = 1100))
+            }
         }
 
         Column {
@@ -51,7 +66,7 @@ class GameScreen(
                 modifier = Modifier.fillMaxWidth().height(400.dp)
             )
 
-            if (state.newWords.isNotEmpty() && state.currentPhase == Phase.SHOW_WORD) {
+            if (state.newWords.isNotEmpty()) {
                 Row {
                     state.newWords.forEach {
                         Button(onClick = {
@@ -62,9 +77,7 @@ class GameScreen(
                     }
                 }
             }
-            if (state.totalTime != 0L || state.time != 0L)  {
-                LinearProgressIndicator(progress = (state.time / state.totalTime).toFloat(), modifier = Modifier.fillMaxWidth())
-            }
+            LinearProgressIndicator(progress = animatedProgress.value, modifier = Modifier.fillMaxWidth())
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(state.messages) {
@@ -83,6 +96,7 @@ class GameScreen(
             }
 
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+//                if (state.drawingPlayer == )
                 OutlinedTextField(state.textInputValue, onValueChange = {
                     viewModel.onEvent(GameScreenEvent.OnChangeTextInputValue(it))
                 }, modifier = Modifier.weight(1f))

@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import cafe.adriel.voyager.navigator.Navigator
+import com.famas.doodlekingkmm.core.util.Constants
+import com.famas.doodlekingkmm.core.util.settings
 import com.famas.doodlekingkmm.data.remote.requests.CreateRoomRequest
 import com.famas.doodlekingkmm.data.remote.requests.JoinRoomRequest
 import com.famas.doodlekingkmm.data.remote.responses.RoomResponse
@@ -22,6 +24,8 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
 
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
+
+    var username = settings.getString(Constants.USERNAME_PREF_KEY, "")
 
     fun onEvent(event: HomeScreenEvent) {
         coroutineScope.launch {
@@ -41,9 +45,24 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
                 is HomeScreenEvent.OnChangeRoomCount -> {
                     state = state.copy(maxPlayers = event.count)
                 }
-
                 HomeScreenEvent.Refresh -> {
                     syncRooms()
+                }
+                is HomeScreenEvent.OnChangeUsernameTextInput -> {
+                    state = state.copy(username = event.value)
+                }
+                HomeScreenEvent.OnConfirmUsernameChange -> {
+                    settings.putString(Constants.USERNAME_PREF_KEY, state.username)
+                    state = state.copy(
+                        username = settings.getString(Constants.USERNAME_PREF_KEY, ""),
+                        enableEditUsername = false
+                    )
+                }
+
+                is HomeScreenEvent.SetEnableEditUsername -> {
+                    state = state.copy(
+                        enableEditUsername = event.enabled
+                    )
                 }
             }
         }
@@ -106,5 +125,6 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
 
     init {
         syncRooms()
+        state = state.copy(username = settings.getString(Constants.USERNAME_PREF_KEY, ""))
     }
 }

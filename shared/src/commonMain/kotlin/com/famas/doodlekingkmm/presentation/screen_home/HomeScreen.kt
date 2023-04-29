@@ -22,8 +22,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.BottomSheetState
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
@@ -33,6 +40,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.ui.text.buildAnnotatedString
+import com.famas.doodlekingkmm.core.util.Constants
+import com.famas.doodlekingkmm.core.util.settings
 import com.famas.doodlekingkmm.presentation.components.NumberPicker
 import com.famas.doodlekingkmm.presentation.screen_game.GameScreenEvent
 
@@ -130,39 +140,71 @@ class HomeScreen : Screen {
             sheetPeekHeight = 0.dp,
             sheetElevation = 16.dp,
             sheetShape = RoundedCornerShape(16f)
-        ) {
-            LazyColumn(modifier = Modifier.padding(it).padding(horizontal = 16.dp)) {
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
+        ) { paddingValues ->
+            Column(modifier = Modifier.padding(paddingValues)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (state.enableEditUsername) {
+                        OutlinedTextField(state.username, onValueChange = {
+                            homeScreenModel.onEvent(HomeScreenEvent.OnChangeUsernameTextInput(it))
+                        }, modifier = Modifier.weight(1f))
+                    } else {
+                        Text(buildAnnotatedString {
+                            append("Username: ")
+                            append(state.username)
+                        }, modifier = Modifier.weight(1f))
+                    }
 
-                item {
-                    androidx.compose.material.Button(onClick = {
-                        homeScreenModel.onEvent(HomeScreenEvent.Refresh)
+                    IconButton(onClick = {
+                        if (state.enableEditUsername) {
+                            homeScreenModel.onEvent(HomeScreenEvent.OnConfirmUsernameChange)
+                        } else {
+                            homeScreenModel.onEvent(HomeScreenEvent.SetEnableEditUsername(true))
+                        }
                     }) {
-                        androidx.compose.material.Text("Refresh")
+                        Icon(
+                            imageVector = if (state.enableEditUsername) Icons.Default.Done else Icons.Default.Edit,
+                            contentDescription = null
+                        )
                     }
                 }
 
-                items(state.rooms) { room ->
-                    Card(onClick = {
-                        homeScreenModel.onEvent(HomeScreenEvent.JoinRoomEvent(room, navigator))
-                    }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                        Column(
-                            modifier = Modifier.padding(
-                                vertical = 10.dp,
-                                horizontal = 15.dp
-                            )
-                        ) {
-                            Text(room.name, style = MaterialTheme.typography.titleMedium)
-                            Text(
-                                "Max Players: " + room.maxPlayers,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                "Joined players: " + room.playerCount,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    item {
+                        androidx.compose.material.Button(onClick = {
+                            homeScreenModel.onEvent(HomeScreenEvent.Refresh)
+                        }) {
+                            androidx.compose.material.Text("Refresh")
+                        }
+                    }
+
+                    items(state.rooms) { room ->
+                        Card(onClick = {
+                            homeScreenModel.onEvent(HomeScreenEvent.JoinRoomEvent(room, navigator))
+                        }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                            Column(
+                                modifier = Modifier.padding(
+                                    vertical = 10.dp,
+                                    horizontal = 15.dp
+                                )
+                            ) {
+                                Text(room.name, style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    "Max Players: " + room.maxPlayers,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    "Joined players: " + room.playerCount,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                 }

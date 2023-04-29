@@ -14,9 +14,6 @@ import io.ktor.client.request.*
 
 class HomeScreenApiImpl(private val httpClient: HttpClient): HomeScreenApi {
     override suspend fun createRoom(request: CreateRoomRequest): BasicApiResponse<Unit> {
-        Napier.d(tag = "myTag") {
-            "Create room request: $request"
-        }
         return httpClient.post(CREATE_ROOM_ROUTE) {
             setBody(request)
         }.body()

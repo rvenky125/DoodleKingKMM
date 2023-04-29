@@ -18,5 +18,6 @@ data class GameScreenState(
     val currentPhase: Phase? = null,
     val time: Long = 0L,
     val totalTime: Long = 0L,
-    val drawingPlayer: String? = null
+    val drawingPlayer: String? = null,
+    val username: String? = null
 )

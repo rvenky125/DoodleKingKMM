@@ -62,6 +62,9 @@ kotlin {
                 api(Deps.Voyager.koin)
                 implementation(Deps.Napier.napier)
                 implementation("com.benasher44:uuid:0.7.0")
+
+//                implementation("com.russhwolf:multiplatform-settings:1.0.0")
+                implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
             }
         }
         val commonTest by getting {

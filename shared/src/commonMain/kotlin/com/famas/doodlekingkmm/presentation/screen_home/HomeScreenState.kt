@@ -8,4 +8,5 @@ data class HomeScreenState(
     val username: String = "",
     val roomName: String = "",
     val maxPlayers: Int = 2,
+    val enableEditUsername: Boolean = false
 )

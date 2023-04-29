@@ -8,7 +8,9 @@ sealed class HomeScreenEvent {
     object CreateRoom: HomeScreenEvent()
     object SyncRooms: HomeScreenEvent()
     object Refresh : HomeScreenEvent()
-
     data class OnChangeRoomName(val value: String): HomeScreenEvent()
     data class OnChangeRoomCount(val count: Int) : HomeScreenEvent()
+    data class OnChangeUsernameTextInput(val value: String): HomeScreenEvent()
+    object OnConfirmUsernameChange: HomeScreenEvent()
+    data class SetEnableEditUsername(val enabled: Boolean): HomeScreenEvent()
 }
