@@ -18,7 +18,6 @@ class KtorGameClient(
 ): GameClient {
     private var webSocketSession: WebSocketSession? = null
     override suspend fun sendBaseModel(baseModel: BaseModel) {
-        Napier.d(tag = "myTag") { "Sending basemodel $baseModel $webSocketSession ${webSocketSession?.outgoing}" }
         webSocketSession?.outgoing?.send(Frame.Text(json.encodeToString(baseModel))) ?: kotlin.run {
             Napier.d(tag = "myTag") { "Web socket is null" }
         }

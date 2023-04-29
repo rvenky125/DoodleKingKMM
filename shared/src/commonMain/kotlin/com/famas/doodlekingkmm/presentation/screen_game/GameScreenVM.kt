@@ -24,6 +24,7 @@ import com.famas.doodlekingkmm.data.models.JoinRoom
 import com.famas.doodlekingkmm.data.models.NewWords
 import com.famas.doodlekingkmm.data.models.OffsetData
 import com.famas.doodlekingkmm.data.models.Path
+import com.famas.doodlekingkmm.data.models.Phase
 import com.famas.doodlekingkmm.data.models.PhaseChange
 import com.famas.doodlekingkmm.data.models.Ping
 import com.famas.doodlekingkmm.data.models.PlayerData
@@ -182,13 +183,6 @@ class GameScreenVM(
                                 drawingPlayer = it.drawingPlayer
                             )
                         }
-
-                        if (it.time == 0L) {
-                            _gameScreenState.value = gameScreenState.value.copy(
-                                currentPhase = null,
-                                newWords = emptyList()
-                            )
-                        }
                     }
 
                     is Ping -> {
@@ -217,8 +211,12 @@ class GameScreenVM(
 
                     else -> {}
                 }
-                Napier.d { it.toString() }
-            }.launchIn(coroutineScope)
+
+                _gameScreenState.value = gameScreenState.value.copy(
+                    showChooseWordsView = gameScreenState.value.newWords.isNotEmpty() && gameScreenState.value.drawingPlayer == gameScreenState.value.username && gameScreenState.value.currentPhase == Phase.NEW_ROUND
+                )
+            }
+            .launchIn(coroutineScope)
     }
 
     init {

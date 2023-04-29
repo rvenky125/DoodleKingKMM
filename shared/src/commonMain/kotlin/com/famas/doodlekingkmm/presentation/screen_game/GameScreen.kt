@@ -70,7 +70,7 @@ class GameScreen(
                 modifier = Modifier.fillMaxWidth().height(400.dp)
             )
 
-            if (state.newWords.isNotEmpty()) {
+            if (state.showChooseWordsView) {
                 Row {
                     state.newWords.forEach {
                         Button(onClick = {
@@ -81,7 +81,10 @@ class GameScreen(
                     }
                 }
             }
-            LinearProgressIndicator(progress = animatedProgress.value, modifier = Modifier.fillMaxWidth())
+            LinearProgressIndicator(
+                progress = animatedProgress.value,
+                modifier = Modifier.fillMaxWidth()
+            )
             state.statusText?.let { Text(it) }
 
             LazyColumn(modifier = Modifier.weight(1f)) {
@@ -100,17 +103,20 @@ class GameScreen(
                 }
             }
 
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                if (state.drawingPlayer != state.username) {
+            if (state.drawingPlayer != state.username) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     OutlinedTextField(state.textInputValue, onValueChange = {
                         viewModel.onEvent(GameScreenEvent.OnChangeTextInputValue(it))
                     }, modifier = Modifier.weight(1f))
-                }
 
-                IconButton(onClick = {
-                    viewModel.onEvent(GameScreenEvent.OnSendMessage)
-                }) {
-                    Icon(imageVector = Icons.Default.Send, null)
+                    IconButton(onClick = {
+                        viewModel.onEvent(GameScreenEvent.OnSendMessage)
+                    }) {
+                        Icon(imageVector = Icons.Default.Send, null)
+                    }
                 }
             }
         }
