@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import com.famas.doodlekingkmm.data.models.Announcement
 import com.famas.doodlekingkmm.data.models.ChatMessage
 import com.famas.doodlekingkmm.data.models.Phase
@@ -33,6 +34,7 @@ import com.famas.doodlekingkmm.data.remote.api.KtorGameClient
 import com.famas.doodlekingkmm.di.httpClient
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasBox
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.delay
 
 class GameScreen(
     private val roomId: String
@@ -44,6 +46,7 @@ class GameScreen(
         val viewModel =
             rememberScreenModel { GameScreenVM(KtorGameClient(httpClient = httpClient)) }
         val state = viewModel.gameScreenState.value
+        val navigator = LocalNavigator.current
 
         val animatedProgress = remember {
             Animatable(1f)
@@ -51,12 +54,13 @@ class GameScreen(
 
 
         LaunchedEffect(Unit) {
-            viewModel.connectToRoom(roomId)
+            delay(1000)
+            viewModel.connectToRoom(roomId, navigator)
         }
 
         LaunchedEffect(state.totalTime, state.time) {
             if (state.totalTime != 0L || state.time != 0L) {
-                animatedProgress.animateTo(state.time.toFloat() / state.totalTime.toFloat(), tween(durationMillis = 1100))
+                animatedProgress.animateTo(state.time.toFloat() / state.totalTime.toFloat())
             }
         }
 
@@ -78,6 +82,7 @@ class GameScreen(
                 }
             }
             LinearProgressIndicator(progress = animatedProgress.value, modifier = Modifier.fillMaxWidth())
+            state.statusText?.let { Text(it) }
 
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(state.messages) {
@@ -96,10 +101,11 @@ class GameScreen(
             }
 
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-//                if (state.drawingPlayer == )
-                OutlinedTextField(state.textInputValue, onValueChange = {
-                    viewModel.onEvent(GameScreenEvent.OnChangeTextInputValue(it))
-                }, modifier = Modifier.weight(1f))
+                if (state.drawingPlayer != state.username) {
+                    OutlinedTextField(state.textInputValue, onValueChange = {
+                        viewModel.onEvent(GameScreenEvent.OnChangeTextInputValue(it))
+                    }, modifier = Modifier.weight(1f))
+                }
 
                 IconButton(onClick = {
                     viewModel.onEvent(GameScreenEvent.OnSendMessage)

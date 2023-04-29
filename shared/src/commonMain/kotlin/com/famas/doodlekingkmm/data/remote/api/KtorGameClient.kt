@@ -18,7 +18,10 @@ class KtorGameClient(
 ): GameClient {
     private var webSocketSession: WebSocketSession? = null
     override suspend fun sendBaseModel(baseModel: BaseModel) {
-        webSocketSession?.outgoing?.send(Frame.Text(json.encodeToString(baseModel)))
+        Napier.d(tag = "myTag") { "Sending basemodel $baseModel $webSocketSession ${webSocketSession?.outgoing}" }
+        webSocketSession?.outgoing?.send(Frame.Text(json.encodeToString(baseModel))) ?: kotlin.run {
+            Napier.d(tag = "myTag") { "Web socket is null" }
+        }
     }
 
     override fun observeBaseModels(clientId: String): Flow<BaseModel> {
@@ -26,6 +29,9 @@ class KtorGameClient(
             webSocketSession = httpClient.webSocketSession {
                 url("${Constants.WEB_SOCKET_BASE_URL}ws/draw?client_id=$clientId")
             }
+
+            Napier.d(tag = "myTag") { "web socket: $webSocketSession" }
+
             val baseModelFlow = webSocketSession!!
                 .incoming
                 .consumeAsFlow()
@@ -48,7 +54,7 @@ class KtorGameClient(
     }
 
     override suspend fun close() {
-        Napier.d { "Closing web socket" }
+        Napier.d(tag = "myTag") { "Closing web socket" }
         webSocketSession?.close()
         webSocketSession = null
     }

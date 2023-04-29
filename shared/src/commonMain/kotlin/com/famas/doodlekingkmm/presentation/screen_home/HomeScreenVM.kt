@@ -1,8 +1,7 @@
 package com.famas.doodlekingkmm.presentation.screen_home
 
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import cafe.adriel.voyager.navigator.Navigator
@@ -10,7 +9,6 @@ import com.famas.doodlekingkmm.core.util.Constants
 import com.famas.doodlekingkmm.core.util.settings
 import com.famas.doodlekingkmm.data.remote.requests.CreateRoomRequest
 import com.famas.doodlekingkmm.data.remote.requests.JoinRoomRequest
-import com.famas.doodlekingkmm.data.remote.responses.RoomResponse
 import com.famas.doodlekingkmm.domain.Response
 import com.famas.doodlekingkmm.domain.repositories.HomeScreenRepo
 import com.famas.doodlekingkmm.presentation.screen_game.GameScreen
@@ -19,8 +17,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
-    var state by mutableStateOf(HomeScreenState())
-        private set
+
+    private val _state = mutableStateOf(HomeScreenState())
+    val state: State<HomeScreenState> = _state
 
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
@@ -34,34 +33,35 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
                     createRoom()
                 }
                 is HomeScreenEvent.JoinRoomEvent -> {
-                    onJoinRoom(event.roomResponse, navigator = event.navigator)
+                    onJoinRoom(event.room.roomId, navigator = event.navigator)
                 }
                 is HomeScreenEvent.OnChangeRoomName -> {
-                    state = state.copy(roomName = event.value)
+                    _state.value = _state.value.copy(roomName = event.value)
                 }
                 HomeScreenEvent.SyncRooms -> {
                     syncRooms()
                 }
                 is HomeScreenEvent.OnChangeRoomCount -> {
-                    state = state.copy(maxPlayers = event.count)
+                    _state.value = _state.value.copy(maxPlayers = event.count)
                 }
                 HomeScreenEvent.Refresh -> {
                     syncRooms()
                 }
                 is HomeScreenEvent.OnChangeUsernameTextInput -> {
-                    state = state.copy(username = event.value)
+                    _state.value = _state.value.copy(username = event.value)
                 }
                 HomeScreenEvent.OnConfirmUsernameChange -> {
-                    settings.putString(Constants.USERNAME_PREF_KEY, state.username)
-                    state = state.copy(
+                    settings.putString(Constants.USERNAME_PREF_KEY, state.value.username)
+                    _state.value = _state.value.copy(
                         username = settings.getString(Constants.USERNAME_PREF_KEY, ""),
                         enableEditUsername = false
                     )
                 }
 
                 is HomeScreenEvent.SetEnableEditUsername -> {
-                    state = state.copy(
-                        enableEditUsername = event.enabled
+                    _state.value = _state.value.copy(
+                        enableEditUsername = event.enabled,
+                        username = settings.getString(Constants.USERNAME_PREF_KEY, "")
                     )
                 }
             }
@@ -71,9 +71,9 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
     private fun syncRooms() {
         homeScreenRepo.getAllRooms().onEach { response ->
             when (response) {
-                is Response.Loading -> state = state.copy(loading = response.isLoading)
+                is Response.Loading -> _state.value = _state.value.copy(loading = response.isLoading)
                 is Response.Success -> {
-                    state = state.copy(rooms = response.data ?: emptyList())
+                    _state.value = _state.value.copy(rooms = response.data ?: emptyList())
                 }
                 is Response.Failure -> {
                     _message.emit(response.message)
@@ -82,12 +82,12 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
         }.launchIn(coroutineScope)
     }
 
-    private fun onJoinRoom(room: RoomResponse, navigator: Navigator?) {
-        homeScreenRepo.joinRoom(JoinRoomRequest(state.username, room.roomId)).onEach { response ->
+    private fun onJoinRoom(roomId: String, navigator: Navigator?) {
+        homeScreenRepo.joinRoom(JoinRoomRequest(state.value.username, roomId)).onEach { response ->
             when (response) {
-                is Response.Loading -> state = state.copy(loading = response.isLoading)
+                is Response.Loading -> _state.value = _state.value.copy(loading = response.isLoading)
                 is Response.Success -> {
-                    navigator?.push(GameScreen(roomId = room.roomId))
+                    navigator?.push(GameScreen(roomId = roomId))
                 }
                 is Response.Failure -> {
                     _message.emit(response.message)
@@ -102,15 +102,15 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
         }
         homeScreenRepo.createRoom(
             CreateRoomRequest(
-                name = state.roomName,
-                maxPlayers = state.maxPlayers
+                name = state.value.roomName,
+                maxPlayers = state.value.maxPlayers
             )
         ).onEach { response ->
             Napier.d(tag = "myTag") {
                 response.toString()
             }
             when (response) {
-                is Response.Loading -> state = state.copy(loading = response.isLoading)
+                is Response.Loading -> _state.value = _state.value
                 is Response.Success -> {
                     syncRooms()
                     _message.emit(response.message ?: "Created room successfully")
@@ -120,11 +120,11 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
                 }
             }
         }.launchIn(coroutineScope)
-        state = state.copy(roomName = "", maxPlayers = 2)
+        _state.value = _state.value.copy(roomName = "", maxPlayers = 2)
     }
 
     init {
         syncRooms()
-        state = state.copy(username = settings.getString(Constants.USERNAME_PREF_KEY, ""))
+        _state.value = _state.value.copy(username = settings.getString(Constants.USERNAME_PREF_KEY, ""))
     }
 }

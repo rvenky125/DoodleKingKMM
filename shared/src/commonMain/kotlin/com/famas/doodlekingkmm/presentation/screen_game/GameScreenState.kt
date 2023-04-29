@@ -19,5 +19,7 @@ data class GameScreenState(
     val time: Long = 0L,
     val totalTime: Long = 0L,
     val drawingPlayer: String? = null,
-    val username: String? = null
+    val username: String? = null,
+    val showChooseWordsView: Boolean = false,
+    val statusText: String? = null
 )

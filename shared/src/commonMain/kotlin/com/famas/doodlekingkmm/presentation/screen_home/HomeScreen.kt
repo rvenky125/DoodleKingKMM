@@ -1,26 +1,14 @@
 package com.famas.doodlekingkmm.presentation.screen_home
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import com.famas.doodlekingkmm.data.remote.api.HomeScreenApiImpl
-import com.famas.doodlekingkmm.data.repositories.HomeScreenRepoImpl
-import com.famas.doodlekingkmm.di.httpClient
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetState
@@ -28,23 +16,39 @@ import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
-import com.famas.doodlekingkmm.core.util.Constants
-import com.famas.doodlekingkmm.core.util.settings
+import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import com.famas.doodlekingkmm.data.remote.api.HomeScreenApiImpl
+import com.famas.doodlekingkmm.data.repositories.HomeScreenRepoImpl
+import com.famas.doodlekingkmm.di.httpClient
 import com.famas.doodlekingkmm.presentation.components.NumberPicker
-import com.famas.doodlekingkmm.presentation.screen_game.GameScreenEvent
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class HomeScreen : Screen {
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -61,7 +65,7 @@ class HomeScreen : Screen {
         }
         val navigator = LocalNavigator.current
 
-        val state = homeScreenModel.state
+        val state = homeScreenModel.state.value
         val snackbarHostState = remember {
             SnackbarHostState()
         }
@@ -158,6 +162,17 @@ class HomeScreen : Screen {
                         }, modifier = Modifier.weight(1f))
                     }
 
+                    if (state.enableEditUsername) {
+                        IconButton(onClick = {
+                            homeScreenModel.onEvent(HomeScreenEvent.SetEnableEditUsername(false))
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null
+                            )
+                        }
+                    }
+
                     IconButton(onClick = {
                         if (state.enableEditUsername) {
                             homeScreenModel.onEvent(HomeScreenEvent.OnConfirmUsernameChange)
@@ -178,10 +193,10 @@ class HomeScreen : Screen {
                     }
 
                     item {
-                        androidx.compose.material.Button(onClick = {
+                        Button(onClick = {
                             homeScreenModel.onEvent(HomeScreenEvent.Refresh)
                         }) {
-                            androidx.compose.material.Text("Refresh")
+                            Text("Refresh")
                         }
                     }
 

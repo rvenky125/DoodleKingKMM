@@ -4,7 +4,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import com.famas.doodlekingkmm.data.remote.responses.RoomResponse
 
 sealed class HomeScreenEvent {
-    data class JoinRoomEvent(val roomResponse: RoomResponse, val navigator: Navigator?): HomeScreenEvent()
+    data class JoinRoomEvent(val room: RoomResponse, val navigator: Navigator?): HomeScreenEvent()
     object CreateRoom: HomeScreenEvent()
     object SyncRooms: HomeScreenEvent()
     object Refresh : HomeScreenEvent()

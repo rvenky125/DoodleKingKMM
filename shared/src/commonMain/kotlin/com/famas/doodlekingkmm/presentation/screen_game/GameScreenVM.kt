@@ -8,11 +8,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
-import com.benasher44.uuid.Uuid
+import cafe.adriel.voyager.navigator.Navigator
 import com.famas.doodlekingkmm.core.util.Constants
+import com.famas.doodlekingkmm.core.util.randomUUID
 import com.famas.doodlekingkmm.core.util.settings
 import com.famas.doodlekingkmm.data.models.Announcement
-import com.famas.doodlekingkmm.data.models.BaseModel
 import com.famas.doodlekingkmm.data.models.ChatMessage
 import com.famas.doodlekingkmm.data.models.ChosenWord
 import com.famas.doodlekingkmm.data.models.DisconnectRequest
@@ -30,13 +30,10 @@ import com.famas.doodlekingkmm.data.models.PlayerData
 import com.famas.doodlekingkmm.data.models.PlayerList
 import com.famas.doodlekingkmm.data.models.RoundDrawInfo
 import com.famas.doodlekingkmm.data.remote.api.GameClient
-import com.famas.doodlekingkmm.di.httpClient
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasController
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasData
 import com.famas.doodlekingkmm.presentation.components.canvas.PathWrapper
 import io.github.aakira.napier.Napier
-import io.ktor.util.date.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -46,7 +43,7 @@ class GameScreenVM(
     val canvasController = CanvasController()
 
     var roomId: String? = null
-    private val uuid = Uuid(10L, 10L).toString()
+    private val uuid = randomUUID()
 
     private val _gameScreenState = mutableStateOf(GameScreenState())
     val gameScreenState: State<GameScreenState> = _gameScreenState
@@ -66,10 +63,18 @@ class GameScreenVM(
                     textInputValue = event.textInputValue
                 )
             }
+
             GameScreenEvent.OnSendMessage -> {
                 coroutineScope.launch {
                     roomId?.let {
-                        gameClient.sendBaseModel(ChatMessage(uuid, it, gameScreenState.value.textInputValue, 0L))
+                        gameClient.sendBaseModel(
+                            ChatMessage(
+                                uuid,
+                                it,
+                                gameScreenState.value.textInputValue,
+                                0L
+                            )
+                        )
                     }
                 }
             }
@@ -91,14 +96,18 @@ class GameScreenVM(
         )
     }
 
-    fun connectToRoom(roomId: String) {
+    fun connectToRoom(roomId: String, navigator: Navigator?) {
         this.roomId = roomId
         _gameScreenState.value.username?.let { user ->
+            Napier.d(tag = "room") { "Connecting to a room $user" }
             coroutineScope.launch {
                 gameClient.sendBaseModel(JoinRoom(user, roomId))
             }
-        } ?: kotlin.run {
-            TODO() //Need navigate the user to previous screen
+        } ?: run {
+            Napier.d(tag = "room") { "Failed Connecting to a room" }
+
+            // TODO: Need navigate the user to previous screen
+            navigator?.pop()
         }
     }
 
@@ -154,7 +163,8 @@ class GameScreenVM(
 
                     is NewWords -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            newWords = it.newWords
+                            newWords = it.newWords,
+                            showChooseWordsView = true
                         )
                     }
 
@@ -170,6 +180,13 @@ class GameScreenVM(
                             _gameScreenState.value = gameScreenState.value.copy(
                                 time = it.time,
                                 drawingPlayer = it.drawingPlayer
+                            )
+                        }
+
+                        if (it.time == 0L) {
+                            _gameScreenState.value = gameScreenState.value.copy(
+                                currentPhase = null,
+                                newWords = emptyList()
                             )
                         }
                     }
@@ -206,7 +223,6 @@ class GameScreenVM(
 
     init {
         startConnection()
-
         _gameScreenState.value = gameScreenState.value.copy(
             username = settings.getStringOrNull(Constants.USERNAME_PREF_KEY)
         )
@@ -241,6 +257,7 @@ class GameScreenVM(
 
     override fun onDispose() {
         super.onDispose()
+        Napier.d { "Called on dispose" }
 
         coroutineScope.launch {
             gameClient.sendBaseModel(DisconnectRequest())
