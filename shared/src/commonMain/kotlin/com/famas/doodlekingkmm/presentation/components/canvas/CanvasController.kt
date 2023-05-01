@@ -4,14 +4,23 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
-class CanvasController {
+class CanvasController() {
+
+    val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 
     private val _redoPathList = mutableStateListOf<PathWrapper>()
     private val _undoPathList = mutableStateListOf<PathWrapper>()
 
     val pathList: SnapshotStateList<PathWrapper> = _undoPathList
+
+    private val pathEventsChannel = Channel<PathEvent>()
+    val pathEventsFlow: Flow<PathEvent> = pathEventsChannel.receiveAsFlow()
 
     private val _historyTracker = MutableSharedFlow<History>(extraBufferCapacity = 1)
     val historyTracker = _historyTracker.asSharedFlow()
@@ -73,14 +82,35 @@ class CanvasController {
         _historyTracker.tryEmit(History())
     }
 
-    fun updateLatestPath(newPoint: Offset) {
+    fun updateDrawDataManually(pathEvent: PathEvent) {
+        when (pathEvent.type) {
+            PathEvent.TYPE_UPDATE -> updateLatestPath(pathEvent.offset)
+            PathEvent.TYPE_INSERT -> insertNewPath(pathEvent.offset)
+        }
+    }
+
+    fun updateLatestPathFromUserInput(newPoint: Offset) {
+        coroutineScope.launch {
+            pathEventsChannel.send(PathEvent(newPoint, PathEvent.TYPE_UPDATE))
+        }
+        updateLatestPath(newPoint)
+    }
+
+    fun insertNewPathFromUserInput(newPoint: Offset) {
+        coroutineScope.launch {
+            pathEventsChannel.send(PathEvent(newPoint, PathEvent.TYPE_INSERT))
+        }
+        insertNewPath(newPoint)
+    }
+
+    private fun updateLatestPath(newPoint: Offset) {
         val index = _undoPathList.lastIndex
         _undoPathList[index].points.add(newPoint)
     }
 
-    fun insertNewPath(newPoint: Offset) {
+    private fun insertNewPath(offset: Offset) {
         val pathWrapper = PathWrapper(
-            points = mutableStateListOf(newPoint),
+            points = mutableStateListOf(offset),
             strokeColor = color,
             strokeWidth = strokeWidth,
         )
@@ -99,3 +129,13 @@ data class History(
     val undoCount: Int = 0,
     val redoCount: Int = 0
 )
+
+data class PathEvent(
+    val offset: Offset,
+    val type: Int
+) {
+    companion object {
+        const val TYPE_INSERT = 0
+        const val TYPE_UPDATE = 1
+    }
+}

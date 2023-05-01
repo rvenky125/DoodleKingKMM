@@ -5,11 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
@@ -23,26 +20,30 @@ fun CanvasBox(
     canvasController: CanvasController,
     modifier: Modifier = Modifier.fillMaxSize(),
     defaultBackgroundColor: Color = Color.White,
+    drawingEnabled: Boolean = true
 ) {
     Canvas(modifier = modifier
         .background(canvasController.bgColor ?: defaultBackgroundColor)
         .pointerInput(Unit) {
-            detectTapGestures(
-                onTap = { offset ->
-                    canvasController.insertNewPath(offset)
-                    canvasController.updateLatestPath(offset)
-                    canvasController.pathList
-                }
-            )
+            if (drawingEnabled) {
+                detectTapGestures(
+                    onTap = { offset ->
+                        canvasController.insertNewPathFromUserInput(offset)
+                        canvasController.updateLatestPathFromUserInput(offset)
+                    }
+                )
+            }
         }
         .pointerInput(Unit) {
-            detectDragGestures(
-                onDragStart = { offset ->
-                    canvasController.insertNewPath(offset)
+            if (drawingEnabled) {
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        canvasController.insertNewPathFromUserInput(offset)
+                    }
+                ) { change, _ ->
+                    val newPoint = change.position
+                    canvasController.updateLatestPathFromUserInput(newPoint)
                 }
-            ) { change, _ ->
-                val newPoint = change.position
-                canvasController.updateLatestPath(newPoint)
             }
 
         }) {

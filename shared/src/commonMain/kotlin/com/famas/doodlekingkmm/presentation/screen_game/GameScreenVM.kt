@@ -1,11 +1,8 @@
 package com.famas.doodlekingkmm.presentation.screen_game
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import cafe.adriel.voyager.navigator.Navigator
@@ -22,8 +19,6 @@ import com.famas.doodlekingkmm.data.models.GameError
 import com.famas.doodlekingkmm.data.models.GameState
 import com.famas.doodlekingkmm.data.models.JoinRoom
 import com.famas.doodlekingkmm.data.models.NewWords
-import com.famas.doodlekingkmm.data.models.OffsetData
-import com.famas.doodlekingkmm.data.models.Path
 import com.famas.doodlekingkmm.data.models.Phase
 import com.famas.doodlekingkmm.data.models.PhaseChange
 import com.famas.doodlekingkmm.data.models.Ping
@@ -32,9 +27,7 @@ import com.famas.doodlekingkmm.data.models.PlayerList
 import com.famas.doodlekingkmm.data.models.RoundDrawInfo
 import com.famas.doodlekingkmm.data.remote.api.GameClient
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasController
-import com.famas.doodlekingkmm.presentation.components.canvas.CanvasData
-import com.famas.doodlekingkmm.presentation.components.canvas.PathWrapper
-import io.github.aakira.napier.Napier
+import com.famas.doodlekingkmm.presentation.components.canvas.PathEvent
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -85,31 +78,28 @@ class GameScreenVM(
         }
     }
 
-    fun drawData(drawData: DrawData) {
-        val snapShotStateList = SnapshotStateList<Offset>()
-        snapShotStateList.addAll(drawData.path.points.map { Offset(it.x, it.y) })
-        canvasController.importPath(
-            CanvasData(
-                path = listOf(
-                    PathWrapper(
-                        snapShotStateList,
-                        strokeColor = Color.Black
-                    )
-                )
-            )
-        )
-    }
+//    fun drawData(drawData: DrawData) {
+//        val snapShotStateList = SnapshotStateList<Offset>()
+//        snapShotStateList.addAll(drawData.path.points.map { Offset(it.x, it.y) })
+//        canvasController.importPath(
+//            CanvasData(
+//                path = listOf(
+//                    PathWrapper(
+//                        snapShotStateList,
+//                        strokeColor = Color.Black
+//                    )
+//                )
+//            )
+//        )
+//    }
 
     fun connectToRoom(roomId: String, navigator: Navigator?) {
         this.roomId = roomId
         _gameScreenState.value.username?.let { user ->
-            Napier.d(tag = "room") { "Connecting to a room $user" }
             coroutineScope.launch {
                 gameClient.sendBaseModel(JoinRoom(user, roomId))
             }
         } ?: run {
-            Napier.d(tag = "room") { "Failed Connecting to a room" }
-
             // TODO: Need navigate the user to previous screen
             navigator?.pop()
         }
@@ -144,7 +134,12 @@ class GameScreenVM(
                     }
 
                     is DrawData -> {
-                        drawData(it)
+                        canvasController.updateDrawDataManually(
+                            PathEvent(
+                                offset = Offset(it.x, it.y),
+                                type = it.pathEvent
+                            )
+                        )
                     }
 
                     is GameError -> {
@@ -219,7 +214,7 @@ class GameScreenVM(
     }
 
     private fun getStatusTextFromPhase(phaseChange: PhaseChange): String {
-        return when(phaseChange.phase) {
+        return when (phaseChange.phase) {
             Phase.WAITING_FOR_PLAYERS -> "Waiting for players"
             Phase.WAITING_FOR_START -> "Waiting for start"
             Phase.NEW_ROUND -> "Starting new round"
@@ -235,37 +230,19 @@ class GameScreenVM(
             username = settings.getStringOrNull(Constants.USERNAME_PREF_KEY)
         )
 
-        canvasController.pathList.asFlow().onEach { pathWrapper ->
-            roomId?.let { id ->
-                Napier.d {
-                    "Sending draw data BaseModel: ${
-                        DrawData(
-                            roomId = id,
-                            path = Path(
-                                points = pathWrapper.points.map { OffsetData(it.x, it.y) },
-                                stroke = pathWrapper.strokeWidth,
-                                color = pathWrapper.strokeColor.hashCode().toString()
-                            )
-                        )
-                    }"
+        canvasController.pathEventsFlow.onEach {
+            if (gameScreenState.value.drawingPlayer == gameScreenState.value.username) {
+                roomId?.let { id ->
+                    val drawData =
+                        DrawData(roomId = id, x = it.offset.x, y = it.offset.y, pathEvent = it.type)
+                    gameClient.sendBaseModel(drawData)
                 }
-                gameClient.sendBaseModel(
-                    DrawData(
-                        roomId = id,
-                        path = Path(
-                            points = pathWrapper.points.map { OffsetData(it.x, it.y) },
-                            stroke = pathWrapper.strokeWidth,
-                            color = pathWrapper.strokeColor.hashCode().toString()
-                        )
-                    )
-                )
             }
         }.launchIn(coroutineScope)
     }
 
     override fun onDispose() {
         super.onDispose()
-        Napier.d { "Called on dispose" }
 
         coroutineScope.launch {
             gameClient.sendBaseModel(DisconnectRequest())

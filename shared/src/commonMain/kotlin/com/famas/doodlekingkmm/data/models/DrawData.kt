@@ -10,31 +10,17 @@ import kotlinx.serialization.Serializable
 data class DrawData(
     @SerialName("room_id")
     val roomId: String,
-    @SerialName("path")
-    val path: Path
-//    val color: Int,
-//    val thickness: Float,
-//    @SerialName("from_x")
-//    val fromX: Float,
-//    @SerialName("from_y")
-//    val fromY: Float,
-//    @SerialName("to_x")
-//    val toX: Float,
-//    @SerialName("to_y")
-//    val toY: Float,
-//    @SerialName("motion_event")
-//    val motionEvent: Int
-): BaseModel()
-
-@Serializable
-data class Path(
-    val points: List<OffsetData>,
-    val stroke: Float,
-    val color: String
-)
-
-@Serializable
-data class OffsetData(
+    val color: Int? = null,
+    val thickness: Float? = null,
+    @SerialName("to_x")
     val x: Float,
-    val y: Float
-)
+    @SerialName("to_y")
+    val y: Float,
+    @SerialName("path_event")
+    val pathEvent: Int
+) : BaseModel() {
+    companion object {
+        const val INSERT = 0
+        const val UPDATE = 1
+    }
+}

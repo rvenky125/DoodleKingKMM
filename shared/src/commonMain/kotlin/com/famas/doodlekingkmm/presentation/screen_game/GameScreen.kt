@@ -99,7 +99,8 @@ class GameScreen(
             Column {
                 CanvasBox(
                     canvasController = viewModel.canvasController,
-                    modifier = Modifier.fillMaxWidth().height(400.dp)
+                    modifier = Modifier.fillMaxWidth().height(400.dp),
+                    drawingEnabled = state.drawingPlayer == state.username
                 )
 
                 LinearProgressIndicator(
