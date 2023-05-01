@@ -24,7 +24,7 @@ fun CanvasBox(
 ) {
     Canvas(modifier = modifier
         .background(canvasController.bgColor ?: defaultBackgroundColor)
-        .pointerInput(Unit) {
+        .pointerInput(drawingEnabled) {
             if (drawingEnabled) {
                 detectTapGestures(
                     onTap = { offset ->
@@ -34,7 +34,7 @@ fun CanvasBox(
                 )
             }
         }
-        .pointerInput(Unit) {
+        .pointerInput(drawingEnabled) {
             if (drawingEnabled) {
                 detectDragGestures(
                     onDragStart = { offset ->
