@@ -78,6 +78,9 @@ class GameScreenVM(
                         )
                     }
                 }
+                _gameScreenState.value = gameScreenState.value.copy(
+                    textInputValue = ""
+                )
             }
         }
     }
@@ -130,13 +133,7 @@ class GameScreenVM(
 
                     is ChosenWord -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
-                    }
-
-                    is DisconnectRequest -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
+                            statusText = it.chosenWord
                         )
                     }
 
@@ -158,7 +155,7 @@ class GameScreenVM(
 
                     is GameState -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
+                            statusText = "${it.drawingPlayer} Drawing ${it.word}"
                         )
                     }
 
@@ -175,12 +172,14 @@ class GameScreenVM(
                                 currentPhase = it.phase,
                                 totalTime = it.time,
                                 time = it.time,
-                                drawingPlayer = it.drawingPlayer
+                                drawingPlayer = it.drawingPlayer,
+                                statusText = getStatusTextFromPhase(phaseChange = it)
                             )
                         } else {
                             _gameScreenState.value = gameScreenState.value.copy(
                                 time = it.time,
-                                drawingPlayer = it.drawingPlayer
+                                drawingPlayer = it.drawingPlayer,
+                                statusText = getStatusTextFromPhase(phaseChange = it)
                             )
                         }
                     }
@@ -193,7 +192,7 @@ class GameScreenVM(
 
                     is PlayerData -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
+                            playerData = it
                         )
                     }
 
@@ -217,6 +216,17 @@ class GameScreenVM(
                 )
             }
             .launchIn(coroutineScope)
+    }
+
+    private fun getStatusTextFromPhase(phaseChange: PhaseChange): String {
+        return when(phaseChange.phase) {
+            Phase.WAITING_FOR_PLAYERS -> "Waiting for players"
+            Phase.WAITING_FOR_START -> "Waiting for start"
+            Phase.NEW_ROUND -> "Starting new round"
+            Phase.GAME_RUNNING -> "${phaseChange.drawingPlayer} drawing"
+            Phase.SHOW_WORD -> "${phaseChange.phase}"
+            else -> ""
+        }
     }
 
     init {
