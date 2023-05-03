@@ -63,6 +63,10 @@ class GameScreenVM(
             GameScreenEvent.OnSendMessage -> {
                 val messageToSend = gameScreenState.value.textInputValue
 
+                if (messageToSend.isEmpty()) {
+                    return
+                }
+
                 coroutineScope.launch {
                     roomId?.let {
                         gameScreenState.value.username?.let { user ->
@@ -97,8 +101,7 @@ class GameScreenVM(
     }
 
     private fun startConnection() {
-        gameClient.observeBaseModels(uuid)
-            .onEach {
+        gameClient.observeBaseModels(uuid).onEach {
                 when (it) {
                     is ChatMessage -> {
                         _gameScreenState.value = gameScreenState.value.copy(
@@ -114,21 +117,14 @@ class GameScreenVM(
 
                     is ChosenWord -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            statusText = it.chosenWord
-                        )
-                    }
-
-                    is DrawAction -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
+                            currentWord = it.chosenWord
                         )
                     }
 
                     is DrawData -> {
                         canvasController.updateDrawDataManually(
                             PathEvent(
-                                offset = Offset(it.x, it.y),
-                                type = it.pathEvent
+                                offset = Offset(it.x, it.y), type = it.pathEvent
                             )
                         )
                     }
@@ -141,14 +137,14 @@ class GameScreenVM(
 
                     is GameState -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            statusText = "${it.drawingPlayer} Drawing ${it.word}"
+                            statusText = "${it.drawingPlayer} Drawing ${it.word}",
+                            currentWord = it.word
                         )
                     }
 
                     is NewWords -> {
                         _gameScreenState.value = gameScreenState.value.copy(
-                            newWords = it.newWords,
-                            showChooseWordsView = true
+                            newWords = it.newWords, showChooseWordsView = true
                         )
                     }
 
@@ -156,7 +152,8 @@ class GameScreenVM(
                         if (it.phase == Phase.NEW_ROUND) {
                             canvasController.reset()
                         }
-                        val statusText = getStatusTextFromPhase(phaseChange = it).ifEmpty { gameScreenState.value.statusText }
+                        val statusText =
+                            getStatusTextFromPhase(phaseChange = it).ifEmpty { gameScreenState.value.statusText }
                         if (it.phase != null) {
                             _gameScreenState.value = gameScreenState.value.copy(
                                 currentPhase = it.phase,
@@ -204,8 +201,7 @@ class GameScreenVM(
                 _gameScreenState.value = gameScreenState.value.copy(
                     showChooseWordsView = gameScreenState.value.newWords.isNotEmpty() && gameScreenState.value.drawingPlayer == gameScreenState.value.username && gameScreenState.value.currentPhase == Phase.NEW_ROUND
                 )
-            }
-            .launchIn(coroutineScope)
+            }.launchIn(coroutineScope)
     }
 
     private fun getStatusTextFromPhase(phaseChange: PhaseChange): String {
@@ -213,8 +209,8 @@ class GameScreenVM(
             Phase.WAITING_FOR_PLAYERS -> "Waiting for players"
             Phase.WAITING_FOR_START -> "Waiting for start"
             Phase.NEW_ROUND -> "Starting new round"
-            Phase.GAME_RUNNING -> "${phaseChange.drawingPlayer} drawing "
-            Phase.SHOW_WORD -> "${phaseChange.phase}"
+            Phase.GAME_RUNNING -> "${phaseChange.drawingPlayer} drawing \"${gameScreenState.value.currentWord}\""
+            Phase.SHOW_WORD -> gameScreenState.value.currentWord
             else -> ""
         }
     }

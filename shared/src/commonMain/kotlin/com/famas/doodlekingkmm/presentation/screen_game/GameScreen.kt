@@ -109,15 +109,16 @@ class GameScreen(
                     progress = animatedProgress.value,
                     modifier = Modifier.fillMaxWidth()
                 )
-                state.statusText?.let {
-                    Text(
-                        it,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    state.statusText ?: "",
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp, top = 12.dp),
+                    textAlign = TextAlign.Center
+                )
 
-                LazyColumn(modifier = Modifier.weight(1f).fillMaxWidth(), horizontalAlignment = Alignment.End) {
+                LazyColumn(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    horizontalAlignment = Alignment.End
+                ) {
                     items(state.messages) {
                         when (it) {
                             is Announcement -> {

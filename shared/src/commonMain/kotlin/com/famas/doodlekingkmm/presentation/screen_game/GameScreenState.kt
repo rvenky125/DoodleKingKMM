@@ -22,5 +22,6 @@ data class GameScreenState(
     val username: String? = null,
     val showChooseWordsView: Boolean = false,
     val statusText: String? = null,
-    val playerData: PlayerData? = null
+    val playerData: PlayerData? = null,
+    val currentWord: String = ""
 )

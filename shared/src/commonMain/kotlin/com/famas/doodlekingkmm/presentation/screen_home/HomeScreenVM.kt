@@ -24,32 +24,37 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
     private val _message = MutableSharedFlow<String>()
     val message: SharedFlow<String> = _message.asSharedFlow()
 
-    var username = settings.getString(Constants.USERNAME_PREF_KEY, "")
-
     fun onEvent(event: HomeScreenEvent) {
         coroutineScope.launch {
             when (event) {
                 HomeScreenEvent.CreateRoom -> {
-                    createRoom()
+                    if (state.value.roomName.isNotBlank()) createRoom()
                 }
+
                 is HomeScreenEvent.JoinRoomEvent -> {
                     onJoinRoom(event.room.roomId, navigator = event.navigator)
                 }
+
                 is HomeScreenEvent.OnChangeRoomName -> {
                     _state.value = _state.value.copy(roomName = event.value)
                 }
+
                 HomeScreenEvent.SyncRooms -> {
                     syncRooms()
                 }
+
                 is HomeScreenEvent.OnChangeRoomCount -> {
                     _state.value = _state.value.copy(maxPlayers = event.count)
                 }
+
                 HomeScreenEvent.Refresh -> {
                     syncRooms()
                 }
+
                 is HomeScreenEvent.OnChangeUsernameTextInput -> {
                     _state.value = _state.value.copy(username = event.value)
                 }
+
                 HomeScreenEvent.OnConfirmUsernameChange -> {
                     settings.putString(Constants.USERNAME_PREF_KEY, state.value.username)
                     _state.value = _state.value.copy(
@@ -71,10 +76,13 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
     private fun syncRooms() {
         homeScreenRepo.getAllRooms().onEach { response ->
             when (response) {
-                is Response.Loading -> _state.value = _state.value.copy(loading = response.isLoading)
+                is Response.Loading -> _state.value =
+                    _state.value.copy(loading = response.isLoading)
+
                 is Response.Success -> {
                     _state.value = _state.value.copy(rooms = response.data ?: emptyList())
                 }
+
                 is Response.Failure -> {
                     _message.emit(response.message)
                 }
@@ -85,10 +93,13 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
     private fun onJoinRoom(roomId: String, navigator: Navigator?) {
         homeScreenRepo.joinRoom(JoinRoomRequest(state.value.username, roomId)).onEach { response ->
             when (response) {
-                is Response.Loading -> _state.value = _state.value.copy(loading = response.isLoading)
+                is Response.Loading -> _state.value =
+                    _state.value.copy(loading = response.isLoading)
+
                 is Response.Success -> {
                     navigator?.push(GameScreen(roomId = roomId))
                 }
+
                 is Response.Failure -> {
                     _message.emit(response.message)
                 }
@@ -115,6 +126,7 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
                     syncRooms()
                     _message.emit(response.message ?: "Created room successfully")
                 }
+
                 is Response.Failure -> {
                     _message.emit(response.message)
                 }
@@ -125,6 +137,7 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
 
     init {
         syncRooms()
-        _state.value = _state.value.copy(username = settings.getString(Constants.USERNAME_PREF_KEY, ""))
+        _state.value =
+            _state.value.copy(username = settings.getString(Constants.USERNAME_PREF_KEY, ""))
     }
 }
