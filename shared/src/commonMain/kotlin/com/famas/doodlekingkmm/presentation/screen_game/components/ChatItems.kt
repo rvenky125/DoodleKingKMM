@@ -34,7 +34,7 @@ fun ChatItem(message: String, name: String, timestamp: Long, modifier: Modifier 
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontWeight = FontWeight.Normal
             )
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(modifier = Modifier.wrapContentSize(),horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     text = name,
                     style = MaterialTheme.typography.labelMedium,
@@ -47,8 +47,6 @@ fun ChatItem(message: String, name: String, timestamp: Long, modifier: Modifier 
                 )
             }
         }
-
-
     }
 }
 

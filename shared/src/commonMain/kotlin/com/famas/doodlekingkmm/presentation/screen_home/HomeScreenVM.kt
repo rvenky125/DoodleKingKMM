@@ -25,50 +25,54 @@ class HomeScreenVM(private val homeScreenRepo: HomeScreenRepo) : ScreenModel {
     val message: SharedFlow<String> = _message.asSharedFlow()
 
     fun onEvent(event: HomeScreenEvent) {
-        coroutineScope.launch {
-            when (event) {
-                HomeScreenEvent.CreateRoom -> {
-                    if (state.value.roomName.isNotBlank()) createRoom()
-                }
+        when (event) {
+            HomeScreenEvent.CreateRoom -> {
+                if (state.value.roomName.isNotBlank()) createRoom()
+            }
 
-                is HomeScreenEvent.JoinRoomEvent -> {
-                    onJoinRoom(event.room.roomId, navigator = event.navigator)
+            is HomeScreenEvent.JoinRoomEvent -> {
+                if (state.value.username.isBlank()) {
+                    coroutineScope.launch {
+                        _message.emit("Please provide valid username")
+                    }
+                    return
                 }
+                onJoinRoom(event.room.roomId, navigator = event.navigator)
+            }
 
-                is HomeScreenEvent.OnChangeRoomName -> {
-                    _state.value = _state.value.copy(roomName = event.value)
-                }
+            is HomeScreenEvent.OnChangeRoomName -> {
+                _state.value = _state.value.copy(roomName = event.value)
+            }
 
-                HomeScreenEvent.SyncRooms -> {
-                    syncRooms()
-                }
+            HomeScreenEvent.SyncRooms -> {
+                syncRooms()
+            }
 
-                is HomeScreenEvent.OnChangeRoomCount -> {
-                    _state.value = _state.value.copy(maxPlayers = event.count)
-                }
+            is HomeScreenEvent.OnChangeRoomCount -> {
+                _state.value = _state.value.copy(maxPlayers = event.count)
+            }
 
-                HomeScreenEvent.Refresh -> {
-                    syncRooms()
-                }
+            HomeScreenEvent.Refresh -> {
+                syncRooms()
+            }
 
-                is HomeScreenEvent.OnChangeUsernameTextInput -> {
-                    _state.value = _state.value.copy(username = event.value)
-                }
+            is HomeScreenEvent.OnChangeUsernameTextInput -> {
+                _state.value = _state.value.copy(username = event.value)
+            }
 
-                HomeScreenEvent.OnConfirmUsernameChange -> {
-                    settings.putString(Constants.USERNAME_PREF_KEY, state.value.username)
-                    _state.value = _state.value.copy(
-                        username = settings.getString(Constants.USERNAME_PREF_KEY, ""),
-                        enableEditUsername = false
-                    )
-                }
+            HomeScreenEvent.OnConfirmUsernameChange -> {
+                settings.putString(Constants.USERNAME_PREF_KEY, state.value.username)
+                _state.value = _state.value.copy(
+                    username = settings.getString(Constants.USERNAME_PREF_KEY, ""),
+                    enableEditUsername = false
+                )
+            }
 
-                is HomeScreenEvent.SetEnableEditUsername -> {
-                    _state.value = _state.value.copy(
-                        enableEditUsername = event.enabled,
-                        username = settings.getString(Constants.USERNAME_PREF_KEY, "")
-                    )
-                }
+            is HomeScreenEvent.SetEnableEditUsername -> {
+                _state.value = _state.value.copy(
+                    enableEditUsername = event.enabled,
+                    username = settings.getString(Constants.USERNAME_PREF_KEY, "")
+                )
             }
         }
     }

@@ -102,106 +102,112 @@ class GameScreenVM(
 
     private fun startConnection() {
         gameClient.observeBaseModels(uuid).onEach {
-                when (it) {
-                    is ChatMessage -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
-                    }
-
-                    is Announcement -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
-                    }
-
-                    is ChosenWord -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            currentWord = it.chosenWord
-                        )
-                    }
-
-                    is DrawData -> {
-                        canvasController.updateDrawDataManually(
-                            PathEvent(
-                                offset = Offset(it.x, it.y), type = it.pathEvent
-                            )
-                        )
-                    }
-
-                    is GameError -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
-                    }
-
-                    is GameState -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            statusText = "${it.drawingPlayer} Drawing ${it.word}",
-                            currentWord = it.word
-                        )
-                    }
-
-                    is NewWords -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            newWords = it.newWords, showChooseWordsView = true
-                        )
-                    }
-
-                    is PhaseChange -> {
-                        if (it.phase == Phase.NEW_ROUND) {
-                            canvasController.reset()
-                        }
-                        val statusText =
-                            getStatusTextFromPhase(phaseChange = it).ifEmpty { gameScreenState.value.statusText }
-                        if (it.phase != null) {
-                            _gameScreenState.value = gameScreenState.value.copy(
-                                currentPhase = it.phase,
-                                totalTime = it.time,
-                                time = it.time,
-                                drawingPlayer = it.drawingPlayer,
-                                statusText = statusText
-                            )
-                        } else {
-                            _gameScreenState.value = gameScreenState.value.copy(
-                                time = it.time,
-                                drawingPlayer = it.drawingPlayer,
-                                statusText = statusText
-                            )
-                        }
-                    }
-
-                    is Ping -> {
-                        coroutineScope.launch {
-                            gameClient.sendBaseModel(Ping())
-                        }
-                    }
-
-                    is PlayerData -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            playerData = it
-                        )
-                    }
-
-                    is PlayerList -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            playersList = it.players
-                        )
-                    }
-
-                    is RoundDrawInfo -> {
-                        _gameScreenState.value = gameScreenState.value.copy(
-                            messages = listOf(it) + gameScreenState.value.messages
-                        )
-                    }
-
-                    else -> {}
+            when (it) {
+                is ChatMessage -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        messages = listOf(it) + gameScreenState.value.messages
+                    )
                 }
 
-                _gameScreenState.value = gameScreenState.value.copy(
-                    showChooseWordsView = gameScreenState.value.newWords.isNotEmpty() && gameScreenState.value.drawingPlayer == gameScreenState.value.username && gameScreenState.value.currentPhase == Phase.NEW_ROUND
-                )
-            }.launchIn(coroutineScope)
+                is Announcement -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        messages = listOf(it) + gameScreenState.value.messages
+                    )
+                }
+
+                is ChosenWord -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        currentWord = it.chosenWord
+                    )
+                }
+
+                is DrawData -> {
+                    canvasController.updateDrawDataManually(
+                        PathEvent(
+                            offset = Offset(it.x, it.y), type = it.pathEvent
+                        )
+                    )
+                }
+
+                is DrawAction -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        messages = listOf(it) + gameScreenState.value.messages
+                    )
+                }
+
+                is GameError -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        messages = listOf(it) + gameScreenState.value.messages
+                    )
+                }
+
+                is GameState -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        statusText = "${it.drawingPlayer} Drawing ${it.word}",
+                        currentWord = it.word
+                    )
+                }
+
+                is NewWords -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        newWords = it.newWords, showChooseWordsView = true
+                    )
+                }
+
+                is PhaseChange -> {
+                    if (it.phase == Phase.NEW_ROUND) {
+                        canvasController.reset()
+                    }
+                    val statusText =
+                        getStatusTextFromPhase(phaseChange = it).ifEmpty { gameScreenState.value.statusText }
+                    if (it.phase != null) {
+                        _gameScreenState.value = gameScreenState.value.copy(
+                            currentPhase = it.phase,
+                            totalTime = it.time,
+                            time = it.time,
+                            drawingPlayer = it.drawingPlayer,
+                            statusText = statusText
+                        )
+                    } else {
+                        _gameScreenState.value = gameScreenState.value.copy(
+                            time = it.time,
+                            drawingPlayer = it.drawingPlayer,
+                            statusText = statusText
+                        )
+                    }
+                }
+
+                is Ping -> {
+                    coroutineScope.launch {
+                        gameClient.sendBaseModel(Ping())
+                    }
+                }
+
+                is PlayerData -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        playerData = it
+                    )
+                }
+
+                is PlayerList -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        playersList = it.players
+                    )
+                }
+
+                is RoundDrawInfo -> {
+                    _gameScreenState.value = gameScreenState.value.copy(
+                        messages = listOf(it) + gameScreenState.value.messages
+                    )
+                }
+
+                else -> {}
+            }
+
+            _gameScreenState.value = gameScreenState.value.copy(
+                showChooseWordsView = gameScreenState.value.newWords.isNotEmpty() && gameScreenState.value.drawingPlayer == gameScreenState.value.username && gameScreenState.value.currentPhase == Phase.NEW_ROUND
+            )
+        }.launchIn(coroutineScope)
     }
 
     private fun getStatusTextFromPhase(phaseChange: PhaseChange): String {

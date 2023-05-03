@@ -9,9 +9,7 @@ import com.famas.doodlekingkmm.data.models.PlayerList
 
 data class GameScreenState(
     val loading: Boolean = false,
-    val messages: List<BaseModel> = listOf(
-        ChatMessage("Venky", "", "Hello world", 0L)
-    ),
+    val messages: List<BaseModel> = listOf(),
     val playersList: List<PlayerData> = emptyList(),
     val newWords: List<String> = emptyList(),
     val textInputValue: String = "",
@@ -23,5 +21,5 @@ data class GameScreenState(
     val showChooseWordsView: Boolean = false,
     val statusText: String? = null,
     val playerData: PlayerData? = null,
-    val currentWord: String = ""
+    val currentWord: String = "",
 )
