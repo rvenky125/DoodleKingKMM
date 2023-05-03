@@ -28,6 +28,8 @@ import com.famas.doodlekingkmm.data.models.RoundDrawInfo
 import com.famas.doodlekingkmm.data.remote.api.GameClient
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasController
 import com.famas.doodlekingkmm.presentation.components.canvas.PathEvent
+import io.github.aakira.napier.Napier
+import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -59,16 +61,20 @@ class GameScreenVM(
             }
 
             GameScreenEvent.OnSendMessage -> {
+                val messageToSend = gameScreenState.value.textInputValue
+
                 coroutineScope.launch {
                     roomId?.let {
-                        gameClient.sendBaseModel(
-                            ChatMessage(
-                                uuid,
-                                it,
-                                gameScreenState.value.textInputValue,
-                                0L
+                        gameScreenState.value.username?.let { user ->
+                            gameClient.sendBaseModel(
+                                ChatMessage(
+                                    from = user,
+                                    roomId = it,
+                                    message = messageToSend,
+                                    timestamp = GMTDate().timestamp
+                                )
                             )
-                        )
+                        }
                     }
                 }
                 _gameScreenState.value = gameScreenState.value.copy(
@@ -77,21 +83,6 @@ class GameScreenVM(
             }
         }
     }
-
-//    fun drawData(drawData: DrawData) {
-//        val snapShotStateList = SnapshotStateList<Offset>()
-//        snapShotStateList.addAll(drawData.path.points.map { Offset(it.x, it.y) })
-//        canvasController.importPath(
-//            CanvasData(
-//                path = listOf(
-//                    PathWrapper(
-//                        snapShotStateList,
-//                        strokeColor = Color.Black
-//                    )
-//                )
-//            )
-//        )
-//    }
 
     fun connectToRoom(roomId: String, navigator: Navigator?) {
         this.roomId = roomId
@@ -162,19 +153,23 @@ class GameScreenVM(
                     }
 
                     is PhaseChange -> {
+                        if (it.phase == Phase.NEW_ROUND) {
+                            canvasController.reset()
+                        }
+                        val statusText = getStatusTextFromPhase(phaseChange = it).ifEmpty { gameScreenState.value.statusText }
                         if (it.phase != null) {
                             _gameScreenState.value = gameScreenState.value.copy(
                                 currentPhase = it.phase,
                                 totalTime = it.time,
                                 time = it.time,
                                 drawingPlayer = it.drawingPlayer,
-                                statusText = getStatusTextFromPhase(phaseChange = it)
+                                statusText = statusText
                             )
                         } else {
                             _gameScreenState.value = gameScreenState.value.copy(
                                 time = it.time,
                                 drawingPlayer = it.drawingPlayer,
-                                statusText = getStatusTextFromPhase(phaseChange = it)
+                                statusText = statusText
                             )
                         }
                     }
@@ -218,7 +213,7 @@ class GameScreenVM(
             Phase.WAITING_FOR_PLAYERS -> "Waiting for players"
             Phase.WAITING_FOR_START -> "Waiting for start"
             Phase.NEW_ROUND -> "Starting new round"
-            Phase.GAME_RUNNING -> "${phaseChange.drawingPlayer} drawing"
+            Phase.GAME_RUNNING -> "${phaseChange.drawingPlayer} drawing "
             Phase.SHOW_WORD -> "${phaseChange.phase}"
             else -> ""
         }

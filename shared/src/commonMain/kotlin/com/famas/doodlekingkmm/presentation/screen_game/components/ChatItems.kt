@@ -3,6 +3,7 @@ package com.famas.doodlekingkmm.presentation.screen_game.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,26 +25,29 @@ fun ChatItem(message: String, name: String, timestamp: Long, modifier: Modifier 
             triangleRenderType = TriangleRenderType.Right(
                 color = MaterialTheme.colorScheme.primaryContainer
             )
-        ).background(MaterialTheme.colorScheme.primaryContainer).padding(8.dp)
+        ),
+        shape = RoundedCornerShape(25)
     ) {
-        Text(
-            text = message,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            fontWeight = FontWeight.Normal
-        )
-
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = Modifier.padding(8.dp)) {
             Text(
-                text = name,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Text(
-                text = timestamp.asFormattedDate(),
+                text = message,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.labelSmall
+                fontWeight = FontWeight.Normal
             )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = timestamp.asFormattedDate(),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
         }
+
 
     }
 }
