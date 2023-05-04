@@ -22,4 +22,6 @@ data class GameScreenState(
     val statusText: String? = null,
     val playerData: PlayerData? = null,
     val currentWord: String = "",
+    val deviceWidth: Int = 1,
+    val deviceHeight: Int = 1
 )

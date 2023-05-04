@@ -30,6 +30,7 @@ import com.famas.doodlekingkmm.presentation.components.canvas.CanvasController
 import com.famas.doodlekingkmm.presentation.components.canvas.PathEvent
 import io.github.aakira.napier.Napier
 import io.ktor.util.date.GMTDate
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -85,6 +86,13 @@ class GameScreenVM(
                     textInputValue = ""
                 )
             }
+
+            is GameScreenEvent.OnLayout -> {
+                _gameScreenState.value = gameScreenState.value.copy(
+                    deviceWidth = event.width,
+                    deviceHeight = event.height
+                )
+            }
         }
     }
 
@@ -122,9 +130,19 @@ class GameScreenVM(
                 }
 
                 is DrawData -> {
+                    val scaleX = gameScreenState.value.deviceWidth / (it.deviceWidth
+                        ?: gameScreenState.value.deviceWidth)
+
+                    val scaleY = gameScreenState.value.deviceHeight / (it.deviceHeight
+                        ?: gameScreenState.value.deviceWidth)
+
                     canvasController.updateDrawDataManually(
                         PathEvent(
-                            offset = Offset(it.x, it.y), type = it.pathEvent
+                            offset = if (it.x != null && it.y != null) Offset(
+                                it.x * scaleX,
+                                it.y * scaleY
+                            ) else null,
+                            type = it.pathEvent
                         )
                     )
                 }
@@ -231,7 +249,14 @@ class GameScreenVM(
             if (gameScreenState.value.drawingPlayer == gameScreenState.value.username) {
                 roomId?.let { id ->
                     val drawData =
-                        DrawData(roomId = id, x = it.offset.x, y = it.offset.y, pathEvent = it.type)
+                        DrawData(
+                            roomId = id,
+                            x = it.offset?.x,
+                            y = it.offset?.y,
+                            pathEvent = it.type,
+                            deviceWidth = gameScreenState.value.deviceWidth,
+                            deviceHeight = gameScreenState.value.deviceHeight
+                        )
                     gameClient.sendBaseModel(drawData)
                 }
             }
@@ -243,6 +268,7 @@ class GameScreenVM(
 
         coroutineScope.launch {
             gameClient.sendBaseModel(DisconnectRequest())
+            delay(1000)
             gameClient.close()
         }
     }

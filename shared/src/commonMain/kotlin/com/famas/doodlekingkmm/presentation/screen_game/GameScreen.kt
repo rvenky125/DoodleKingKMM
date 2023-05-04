@@ -2,6 +2,7 @@ package com.famas.doodlekingkmm.presentation.screen_game
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -84,7 +87,9 @@ class GameScreen(
 
         ModalNavigationDrawer(drawerContent = {
             PlayerScores(state.playersList)
-        }, drawerState = drawerState) {
+        }, drawerState = drawerState, modifier = Modifier.fillMaxSize().onPlaced {
+            viewModel.onEvent(GameScreenEvent.OnLayout(it.size.width, it.size.height))
+        }) {
             if (state.showChooseWordsView) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -108,7 +113,7 @@ class GameScreen(
                 Column {
                     CanvasBox(
                         canvasController = viewModel.canvasController,
-                        modifier = Modifier.fillMaxWidth().height(400.dp),
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.55f),
                         drawingEnabled = state.drawingPlayer == state.username
                     )
 

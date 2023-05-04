@@ -56,8 +56,13 @@ class CanvasController() {
 
     fun exportPath() = CanvasData(bgColor, pathList.toList())
 
+    fun unDo(emitEvent: Boolean) {
+        if (emitEvent) {
+            coroutineScope.launch {
+                pathEventsChannel.send(PathEvent(null, PathEvent.TYPE_UNDO))
+            }
+        }
 
-    fun unDo() {
         if (_undoPathList.isNotEmpty()) {
             val last = _undoPathList.last()
             _redoPathList.add(last)
@@ -84,8 +89,9 @@ class CanvasController() {
 
     fun updateDrawDataManually(pathEvent: PathEvent) {
         when (pathEvent.type) {
-            PathEvent.TYPE_UPDATE -> updateLatestPath(pathEvent.offset)
-            PathEvent.TYPE_INSERT -> insertNewPath(pathEvent.offset)
+            PathEvent.TYPE_UPDATE -> pathEvent.offset?.let { updateLatestPath(it) }
+            PathEvent.TYPE_INSERT -> pathEvent.offset?.let { insertNewPath(it) }
+            PathEvent.TYPE_UNDO -> unDo(false)
         }
     }
 
@@ -131,11 +137,12 @@ data class History(
 )
 
 data class PathEvent(
-    val offset: Offset,
+    val offset: Offset? = null,
     val type: Int
 ) {
     companion object {
         const val TYPE_INSERT = 0
         const val TYPE_UPDATE = 1
+        const val TYPE_UNDO = 2
     }
 }
