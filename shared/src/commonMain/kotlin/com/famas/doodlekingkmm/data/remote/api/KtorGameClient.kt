@@ -15,7 +15,7 @@ import kotlinx.serialization.json.Json
 
 class KtorGameClient(
     private val httpClient: HttpClient
-): GameClient {
+) : GameClient {
     private var webSocketSession: WebSocketSession? = null
     override suspend fun sendBaseModel(baseModel: BaseModel) {
         webSocketSession?.outgoing?.send(Frame.Text(json.encodeToString(baseModel))) ?: kotlin.run {
@@ -23,10 +23,10 @@ class KtorGameClient(
         }
     }
 
-    override fun observeBaseModels(clientId: String): Flow<BaseModel> {
+    override fun observeBaseModels(): Flow<BaseModel> {
         return flow {
             webSocketSession = httpClient.webSocketSession {
-                url("${Constants.WEB_SOCKET_BASE_URL}ws/draw?client_id=$clientId")
+                url("${Constants.WEB_SOCKET_BASE_URL}ws/draw")
             }
 
             Napier.d(tag = "myTag") { "web socket: $webSocketSession" }

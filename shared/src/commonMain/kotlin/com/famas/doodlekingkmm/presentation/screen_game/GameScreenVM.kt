@@ -41,7 +41,6 @@ class GameScreenVM(
     val canvasController = CanvasController()
 
     var roomId: String? = null
-    private val uuid = randomUUID()
 
     private val _gameScreenState = mutableStateOf(GameScreenState())
     val gameScreenState: State<GameScreenState> = _gameScreenState
@@ -110,7 +109,7 @@ class GameScreenVM(
     }
 
     private fun startConnection() {
-        gameClient.observeBaseModels(uuid).onEach {
+        gameClient.observeBaseModels().onEach {
             when (it) {
                 is ChatMessage -> {
                     _gameScreenState.value = gameScreenState.value.copy(

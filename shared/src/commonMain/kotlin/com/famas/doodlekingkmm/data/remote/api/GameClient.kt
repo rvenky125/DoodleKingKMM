@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface GameClient {
     suspend fun sendBaseModel(baseModel: BaseModel)
     suspend fun close()
-    fun observeBaseModels(clientId: String): Flow<BaseModel>
+    fun observeBaseModels(): Flow<BaseModel>
 }
 
 
