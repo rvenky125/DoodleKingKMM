@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -47,6 +48,7 @@ import com.famas.doodlekingkmm.data.remote.api.HomeScreenApiImpl
 import com.famas.doodlekingkmm.data.repositories.HomeScreenRepoImpl
 import com.famas.doodlekingkmm.di.httpClient
 import com.famas.doodlekingkmm.presentation.components.NumberPicker
+import com.famas.doodlekingkmm.presentation.components.canvas.ColorCircle
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -145,6 +147,7 @@ class HomeScreen : Screen {
             sheetElevation = 16.dp,
             sheetShape = RoundedCornerShape(16f)
         ) { paddingValues ->
+
             Column(modifier = Modifier.padding(paddingValues)) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),

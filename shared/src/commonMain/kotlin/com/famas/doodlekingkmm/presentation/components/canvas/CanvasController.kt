@@ -11,6 +11,13 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class CanvasController() {
+    val colors = listOf(
+        Color.Black,
+        Color.Green,
+        Color.Red,
+        Color.Blue,
+        Color.Yellow
+    )
 
     val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 
@@ -84,6 +91,7 @@ class CanvasController() {
     fun reset() {
         _redoPathList.clear()
         _undoPathList.clear()
+        color = Color.Black
         _historyTracker.tryEmit(History())
     }
 

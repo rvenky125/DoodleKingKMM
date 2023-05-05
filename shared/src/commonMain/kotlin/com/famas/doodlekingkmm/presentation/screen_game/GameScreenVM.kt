@@ -3,6 +3,7 @@ package com.famas.doodlekingkmm.presentation.screen_game
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import cafe.adriel.voyager.navigator.Navigator
@@ -136,6 +137,10 @@ class GameScreenVM(
                     val scaleY = gameScreenState.value.deviceHeight / (it.deviceHeight
                         ?: gameScreenState.value.deviceWidth)
 
+                    if (canvasController.color.hashCode() != it.color && it.color != null) {
+                        canvasController.changeColor(Color(it.color))
+                    }
+
                     canvasController.updateDrawDataManually(
                         PathEvent(
                             offset = if (it.x != null && it.y != null) Offset(
@@ -251,6 +256,7 @@ class GameScreenVM(
                     val drawData =
                         DrawData(
                             roomId = id,
+                            color = canvasController.color.hashCode(),
                             x = it.offset?.x,
                             y = it.offset?.y,
                             pathEvent = it.type,
