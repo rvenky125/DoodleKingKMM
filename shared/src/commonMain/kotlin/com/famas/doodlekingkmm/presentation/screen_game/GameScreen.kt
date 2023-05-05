@@ -35,7 +35,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -87,9 +89,7 @@ class GameScreen(
 
         ModalNavigationDrawer(drawerContent = {
             PlayerScores(state.playersList)
-        }, drawerState = drawerState, modifier = Modifier.fillMaxSize().onPlaced {
-            viewModel.onEvent(GameScreenEvent.OnLayout(it.size.width, it.size.height))
-        }) {
+        }, drawerState = drawerState, modifier = Modifier.fillMaxSize()) {
             if (state.showChooseWordsView) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -113,7 +113,14 @@ class GameScreen(
                 Column {
                     CanvasBox(
                         canvasController = viewModel.canvasController,
-                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.55f),
+                        modifier = Modifier.fillMaxWidth().fillMaxHeight(0.55f).onPlaced {
+                            viewModel.onEvent(
+                                GameScreenEvent.OnLayout(
+                                    it.size.width,
+                                    it.size.height
+                                )
+                            )
+                        },
                         drawingEnabled = state.drawingPlayer == state.username
                     )
 

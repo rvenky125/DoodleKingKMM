@@ -1,11 +1,8 @@
 package com.famas.doodlekingkmm.presentation.screen_game
 
 import com.famas.doodlekingkmm.data.models.BaseModel
-import com.famas.doodlekingkmm.data.models.ChatMessage
-import com.famas.doodlekingkmm.data.models.NewWords
 import com.famas.doodlekingkmm.data.models.Phase
 import com.famas.doodlekingkmm.data.models.PlayerData
-import com.famas.doodlekingkmm.data.models.PlayerList
 
 data class GameScreenState(
     val loading: Boolean = false,
@@ -22,6 +19,6 @@ data class GameScreenState(
     val statusText: String? = null,
     val playerData: PlayerData? = null,
     val currentWord: String = "",
-    val deviceWidth: Int = 1,
-    val deviceHeight: Int = 1
+    val canvasWidth: Int = 1,
+    val canvasHeight: Int = 1,
 )

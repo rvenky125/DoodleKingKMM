@@ -90,8 +90,8 @@ class GameScreenVM(
 
             is GameScreenEvent.OnLayout -> {
                 _gameScreenState.value = gameScreenState.value.copy(
-                    deviceWidth = event.width,
-                    deviceHeight = event.height
+                    canvasWidth = event.width,
+                    canvasHeight = event.height
                 )
             }
         }
@@ -131,11 +131,7 @@ class GameScreenVM(
                 }
 
                 is DrawData -> {
-                    val scaleX = gameScreenState.value.deviceWidth / (it.deviceWidth
-                        ?: gameScreenState.value.deviceWidth)
-
-                    val scaleY = gameScreenState.value.deviceHeight / (it.deviceHeight
-                        ?: gameScreenState.value.deviceWidth)
+                    Napier.d { "width ${gameScreenState.value.canvasWidth} height: ${gameScreenState.value.canvasHeight}" }
 
                     if (canvasController.color.hashCode() != it.color && it.color != null) {
                         canvasController.changeColor(Color(it.color))
@@ -144,8 +140,8 @@ class GameScreenVM(
                     canvasController.updateDrawDataManually(
                         PathEvent(
                             offset = if (it.x != null && it.y != null) Offset(
-                                it.x * scaleX,
-                                it.y * scaleY
+                                it.x.times(gameScreenState.value.canvasWidth),
+                                it.y.times(gameScreenState.value.canvasHeight)
                             ) else null,
                             type = it.pathEvent
                         )
@@ -251,17 +247,16 @@ class GameScreenVM(
         )
 
         canvasController.pathEventsFlow.onEach {
+            Napier.d { "width ${gameScreenState.value.canvasWidth} height: ${gameScreenState.value.canvasHeight}" }
             if (gameScreenState.value.drawingPlayer == gameScreenState.value.username) {
                 roomId?.let { id ->
                     val drawData =
                         DrawData(
                             roomId = id,
                             color = canvasController.color.hashCode(),
-                            x = it.offset?.x,
-                            y = it.offset?.y,
+                            x = it.offset?.x?.div(gameScreenState.value.canvasWidth),
+                            y = it.offset?.y?.div(gameScreenState.value.canvasHeight),
                             pathEvent = it.type,
-                            deviceWidth = gameScreenState.value.deviceWidth,
-                            deviceHeight = gameScreenState.value.deviceHeight
                         )
                     gameClient.sendBaseModel(drawData)
                 }

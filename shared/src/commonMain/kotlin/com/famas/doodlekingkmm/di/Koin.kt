@@ -2,6 +2,7 @@ package com.famas.doodlekingkmm.di
 
 import com.famas.doodlekingkmm.core.util.Constants
 import com.famas.doodlekingkmm.data.models.*
+import com.famas.doodlekingkmm.data.remote.api.KtorGameClient
 import com.famas.doodlekingkmm.data.repositories.GameScreenRepoImpl
 import com.famas.doodlekingkmm.data.repositories.HomeScreenRepoImpl
 import com.famas.doodlekingkmm.domain.repositories.GameScreenRepo
@@ -79,7 +80,7 @@ val mainModule = module {
     }
 
     single<GameScreenRepo> {
-        GameScreenRepoImpl()
+        GameScreenRepoImpl(KtorGameClient(httpClient))
     }
 
     factory { HomeScreenVM(get()) }
