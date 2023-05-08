@@ -25,9 +25,9 @@ class GameScreenRepoImpl(private val gameClient: GameClient) : GameScreenRepo {
         }
     }
 
-    override fun observeBaseModels(clientId: String): Flow<BaseModel> {
+    override fun observeBaseModels(): Flow<BaseModel> {
         return try {
-            gameClient.observeBaseModels(clientId)
+            gameClient.observeBaseModels()
         } catch (e: Exception) {
             e.printStackTrace()
             return flow {  }
