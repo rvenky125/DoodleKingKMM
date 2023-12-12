@@ -4,10 +4,8 @@ plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
-
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
-
 }
 
 fun composeDependency(groupWithArtifact: String) = "$groupWithArtifact:1.3.0"
@@ -16,7 +14,7 @@ kotlin {
     android {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "11"
+                jvmTarget = "1.8"
             }
         }
     }
@@ -56,6 +54,7 @@ kotlin {
                 api("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
                 api("io.ktor:ktor-client-cio:$ktorVersion")
                 api(Deps.Koin.core)
+                api(Deps.Koin.compose)
 
                 api(Deps.Voyager.navigator)
                 api(Deps.Voyager.transitions)
@@ -73,8 +72,8 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation(Deps.Koin.android)
-                api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+//                implementation(Deps.Koin.android)
+                api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
             }
         }
         val androidUnitTest by getting

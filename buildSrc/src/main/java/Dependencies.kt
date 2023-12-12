@@ -1,6 +1,7 @@
 object Versions {
-    const val koin = "3.4.0"
-    const val voyagerVersion = "1.0.0-rc04"
+    const val koin = "3.5.0"
+    const val koin_compose = "1.1.0"
+    const val voyagerVersion = "1.0.0-rc05"
     const val napierVersion = "2.6.1"
 }
 
@@ -10,7 +11,7 @@ object Deps {
         const val core = "io.insert-koin:koin-core:${Versions.koin}"
         const val test = "io.insert-koin:koin-test:${Versions.koin}"
         const val android = "io.insert-koin:koin-android:${Versions.koin}"
-        const val compose = "io.insert-koin:koin-androidx-compose:${Versions.koin}"
+        const val compose = "io.insert-koin:koin-compose:${Versions.koin_compose}"
     }
 
     object Voyager {

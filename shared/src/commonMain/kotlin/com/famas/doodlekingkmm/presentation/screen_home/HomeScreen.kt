@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,33 +39,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import com.famas.doodlekingkmm.data.remote.api.HomeScreenApiImpl
-import com.famas.doodlekingkmm.data.repositories.HomeScreenRepoImpl
-import com.famas.doodlekingkmm.di.httpClient
+import com.famas.doodlekingkmm.core.util.getScreenModel
 import com.famas.doodlekingkmm.presentation.components.NumberPicker
-import com.famas.doodlekingkmm.presentation.components.canvas.ColorCircle
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class HomeScreen : Screen {
+
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
     @Composable
     override fun Content() {
-        val homeScreenModel = rememberScreenModel {
-            HomeScreenVM(
-                HomeScreenRepoImpl(
-                    HomeScreenApiImpl(
-                        httpClient
-                    )
-                )
-            )
-        }
+        val homeScreenModel = getScreenModel<HomeScreenVM>()
         val navigator = LocalNavigator.current
 
         val state = homeScreenModel.state.value
@@ -84,7 +73,7 @@ class HomeScreen : Screen {
         }
 
         val bottomSheetState =
-            remember { BottomSheetState(initialValue = BottomSheetValue.Collapsed) }
+            rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
         val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
         BottomSheetScaffold(
@@ -98,7 +87,7 @@ class HomeScreen : Screen {
                 SnackbarHost(snackbarHostState)
             },
             floatingActionButton = {
-                if (!scaffoldState.bottomSheetState.isAnimationRunning && scaffoldState.bottomSheetState.isCollapsed)
+                if (scaffoldState.bottomSheetState.isCollapsed)
                     FloatingActionButton(onClick = {
                         coroutineScope.launch {
                             scaffoldState.bottomSheetState.expand()

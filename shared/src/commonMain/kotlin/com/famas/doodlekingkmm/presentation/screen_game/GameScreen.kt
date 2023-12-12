@@ -45,10 +45,10 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import com.famas.doodlekingkmm.core.util.asFormattedDate
+import com.famas.doodlekingkmm.core.util.getScreenModel
 import com.famas.doodlekingkmm.data.models.Announcement
 import com.famas.doodlekingkmm.data.models.ChatMessage
 import com.famas.doodlekingkmm.data.remote.api.KtorGameClient
-import com.famas.doodlekingkmm.di.httpClient
 import com.famas.doodlekingkmm.presentation.components.canvas.CanvasBox
 import com.famas.doodlekingkmm.presentation.screen_game.components.ChatItem
 import com.famas.doodlekingkmm.presentation.screen_game.components.PlayerScores
@@ -62,8 +62,7 @@ class GameScreen(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val viewModel =
-            rememberScreenModel { GameScreenVM(KtorGameClient(httpClient = httpClient)) }
+        val viewModel = getScreenModel<GameScreenVM>()
         val state = viewModel.gameScreenState.value
         val navigator = LocalNavigator.current
 
