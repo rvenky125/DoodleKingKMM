@@ -18,6 +18,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "DoodleKingKmm"
+rootProject.name = "DoodleKingKMM"
 include(":androidApp")
 include(":shared")
