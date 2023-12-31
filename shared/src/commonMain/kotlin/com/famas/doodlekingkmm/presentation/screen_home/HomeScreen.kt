@@ -1,5 +1,6 @@
 package com.famas.doodlekingkmm.presentation.screen_home
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,9 +17,12 @@ import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FabPosition
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Button
@@ -50,7 +54,10 @@ import kotlinx.coroutines.launch
 
 class HomeScreen : Screen {
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+    @OptIn(
+        ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
+        ExperimentalFoundationApi::class
+    )
     @Composable
     override fun Content() {
         val homeScreenModel = getScreenModel<HomeScreenVM>()
@@ -86,17 +93,6 @@ class HomeScreen : Screen {
             snackbarHost = {
                 SnackbarHost(snackbarHostState)
             },
-            floatingActionButton = {
-                if (scaffoldState.bottomSheetState.isCollapsed)
-                    FloatingActionButton(onClick = {
-                        coroutineScope.launch {
-                            scaffoldState.bottomSheetState.expand()
-                        }
-                    }, modifier = Modifier.padding(bottom = 100.dp)) {
-                        Text("Create Room", modifier = Modifier.padding(horizontal = 15.dp))
-                    }
-
-            },
             sheetContent = {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     OutlinedTextField(state.roomName, onValueChange = {
@@ -131,12 +127,10 @@ class HomeScreen : Screen {
                     }
                 }
             },
-            floatingActionButtonPosition = FabPosition.Center,
             sheetPeekHeight = 0.dp,
             sheetElevation = 16.dp,
             sheetShape = RoundedCornerShape(16f)
         ) { paddingValues ->
-
             Column(modifier = Modifier.padding(paddingValues)) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -179,17 +173,47 @@ class HomeScreen : Screen {
                     }
                 }
 
-                LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    item {
-                        Spacer(modifier = Modifier.height(20.dp))
-                    }
-
-                    item {
-                        Button(onClick = {
-                            homeScreenModel.onEvent(HomeScreenEvent.Refresh)
-                        }) {
-                            Text("Refresh")
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(vertical = 10.dp)
+                ) {
+                    Text(
+                        "Play with your friends by creating room here",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Button(onClick = {
+                        if (bottomSheetState.isCollapsed) {
+                            coroutineScope.launch {
+                                bottomSheetState.expand()
+                            }
                         }
+                    }, modifier = Modifier.padding(top = 4.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add Room",
+                            modifier = Modifier.padding(start = 0.dp)
+                        )
+                        Text(
+                            "Create Room",
+                            modifier = Modifier.padding(start = 5.dp)
+                        )
+                    }
+                }
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 10.dp)
+                        .pullRefresh(
+                            state = rememberPullRefreshState(
+                                refreshing = state.loading,
+                                onRefresh = { homeScreenModel.onEvent(HomeScreenEvent.Refresh) }
+                            )
+                        )
+                ) {
+                    stickyHeader {
+                        Text("Available Rooms", style = MaterialTheme.typography.titleMedium)
                     }
 
                     items(state.rooms) { room ->
