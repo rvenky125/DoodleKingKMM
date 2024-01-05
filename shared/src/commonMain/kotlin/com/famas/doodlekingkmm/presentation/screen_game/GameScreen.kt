@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,7 +59,6 @@ import kotlinx.coroutines.launch
 class GameScreen(
     private val roomId: String
 ) : Screen {
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
@@ -120,6 +120,9 @@ class GameScreen(
                                 )
                             )
                         },
+                        onGoBack = {
+                            navigator?.pop()
+                        },
                         drawingEnabled = state.drawingPlayer == state.username
                     )
 
@@ -144,7 +147,8 @@ class GameScreen(
                             }
                             LazyColumn(
                                 modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.End
+                                horizontalAlignment = Alignment.End,
+                                reverseLayout = true
                             ) {
                                 items(state.messages) {
                                     when (it) {

@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -40,6 +42,7 @@ fun CanvasBox(
     canvasController: CanvasController,
     modifier: Modifier = Modifier.fillMaxSize(),
     defaultBackgroundColor: Color = Color.White,
+    onGoBack: () -> Unit,
     drawingEnabled: Boolean = true
 ) {
     Box {
@@ -86,6 +89,12 @@ fun CanvasBox(
             modifier = Modifier.align(Alignment.TopCenter).background(Color.White).padding(5.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(onClick = {
+                onGoBack()
+            }) {
+                Icon(imageVector = Icons.Default.NavigateBefore, contentDescription = "navigation back")
+            }
+            Spacer(modifier = Modifier.weight(1f))
             canvasController.colors.forEach {
                 ColorCircle(
                     color = it,

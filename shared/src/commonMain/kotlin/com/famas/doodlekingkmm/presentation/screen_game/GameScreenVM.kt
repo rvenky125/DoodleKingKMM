@@ -264,12 +264,10 @@ class GameScreenVM(
     }
 
     override fun onDispose() {
-        super.onDispose()
-
         coroutineScope.launch {
             gameClient.sendBaseModel(DisconnectRequest())
-            delay(1000)
             gameClient.close()
         }
+        super.onDispose()
     }
 }

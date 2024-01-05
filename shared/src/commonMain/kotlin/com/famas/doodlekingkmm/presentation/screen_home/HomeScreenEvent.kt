@@ -5,7 +5,7 @@ import com.famas.doodlekingkmm.data.remote.responses.RoomResponse
 
 sealed class HomeScreenEvent {
     data class JoinRoomEvent(val room: RoomResponse, val navigator: Navigator?): HomeScreenEvent()
-    object CreateRoom: HomeScreenEvent()
+    data object CreateRoom: HomeScreenEvent()
     object SyncRooms: HomeScreenEvent()
     object Refresh : HomeScreenEvent()
     data class OnChangeRoomName(val value: String): HomeScreenEvent()
