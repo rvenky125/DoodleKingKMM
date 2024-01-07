@@ -1,3 +1,4 @@
+![doodle_king_banner](https://github.com/rvenky125/DoodleKingKMM/assets/58197145/9eb8040d-0d1f-40af-aad3-19c589da9241)
 ## Doodle King KMM app for Android and iOS
 This project is the implementation of how one can adopt the Kmp (Kotlin multiplatform) for building Android and ios apps.
 I rebuilt Philipp Lackner's doodle king api for backend. I have used the **Compose Multiplatform** to build the
