@@ -1,5 +1,6 @@
 package com.famas.doodlekingkmm.di
 
+import com.famas.doodlekingkmm.BuildKonfig
 import com.famas.doodlekingkmm.core.util.Constants
 import com.famas.doodlekingkmm.data.models.*
 import com.famas.doodlekingkmm.data.remote.api.GameClient
@@ -59,7 +60,7 @@ val mainModule = module {
     single {
         HttpClient(CIO) {
             defaultRequest {
-                url(Constants.BASE_URL)
+                url(BuildKonfig.BASE_URL)
                 contentType(ContentType.Application.Json)
             }
 

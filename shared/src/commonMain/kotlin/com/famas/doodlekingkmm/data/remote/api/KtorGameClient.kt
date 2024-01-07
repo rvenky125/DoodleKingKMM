@@ -1,5 +1,6 @@
 package com.famas.doodlekingkmm.data.remote.api
 
+import com.famas.doodlekingkmm.BuildKonfig
 import com.famas.doodlekingkmm.core.util.Constants
 import com.famas.doodlekingkmm.data.models.BaseModel
 import io.github.aakira.napier.Napier
@@ -26,7 +27,7 @@ class KtorGameClient(
     override fun observeBaseModels(): Flow<BaseModel> {
         return flow {
             webSocketSession = httpClient.webSocketSession {
-                url("${Constants.WEB_SOCKET_BASE_URL}ws/draw")
+                url("${BuildKonfig.WEB_SOCKET_BASE_URL}ws/draw")
             }
 
             Napier.d(tag = "myTag") { "web socket: $webSocketSession" }

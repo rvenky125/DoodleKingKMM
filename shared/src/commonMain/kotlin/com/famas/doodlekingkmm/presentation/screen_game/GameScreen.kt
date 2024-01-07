@@ -1,6 +1,10 @@
 package com.famas.doodlekingkmm.presentation.screen_game
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -14,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,10 +41,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -59,12 +67,12 @@ import kotlinx.coroutines.launch
 class GameScreen(
     private val roomId: String
 ) : Screen {
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val viewModel = getScreenModel<GameScreenVM>()
         val state = viewModel.gameScreenState.value
         val navigator = LocalNavigator.current
+        val focusManager = LocalFocusManager.current
 
         val animatedProgress = remember {
             Animatable(1f)
@@ -73,7 +81,6 @@ class GameScreen(
         val drawerState = rememberDrawerState(DrawerValue.Closed)
 
         val coroutineScope = rememberCoroutineScope()
-
 
         LaunchedEffect(Unit) {
             delay(1000)
@@ -136,7 +143,7 @@ class GameScreen(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                     )
 
-                    Column {
+                    Column(modifier = Modifier.pointerInput(Unit) { detectTapGestures { } }) {
                         Row(modifier = Modifier.weight(1f)) {
                             IconButton(onClick = {
                                 coroutineScope.launch {
@@ -199,12 +206,23 @@ class GameScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                OutlinedTextField(state.textInputValue, onValueChange = {
-                                    viewModel.onEvent(GameScreenEvent.OnChangeTextInputValue(it))
-                                }, modifier = Modifier.weight(1f))
+                                OutlinedTextField(
+                                    state.textInputValue,
+                                    onValueChange = {
+                                        viewModel.onEvent(GameScreenEvent.OnChangeTextInputValue(it))
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    keyboardOptions = KeyboardOptions(
+                                        autoCorrect = false,
+                                        imeAction = ImeAction.Done
+                                    ),
+                                    maxLines = 1
+                                )
 
                                 IconButton(onClick = {
                                     viewModel.onEvent(GameScreenEvent.OnSendMessage)
+                                    focusManager.clearFocus()
+
                                 }) {
                                     Icon(imageVector = Icons.Default.Send, null)
                                 }

@@ -1,6 +1,7 @@
 package com.famas.doodlekingkmm.presentation.screen_home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -71,6 +74,7 @@ class HomeScreen : Screen {
             SnackbarHostState()
         }
         val coroutineScope = rememberCoroutineScope()
+        val focusManager = LocalFocusManager.current
 
         LaunchedEffect(Unit) {
             homeScreenModel.message.collectLatest {
@@ -86,6 +90,13 @@ class HomeScreen : Screen {
             rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
         val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
+        fun closeKeyboardAndSheet() {
+            coroutineScope.launch {
+                bottomSheetState.collapse()
+                focusManager.clearFocus()
+            }
+        }
+
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
             topBar = {
@@ -98,6 +109,12 @@ class HomeScreen : Screen {
             },
             sheetContent = {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                    IconButton(
+                        onClick = { closeKeyboardAndSheet() },
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "close")
+                    }
                     OutlinedTextField(state.roomName, onValueChange = {
                         homeScreenModel.onEvent(HomeScreenEvent.OnChangeRoomName(it))
                     }, placeholder = {
@@ -134,7 +151,9 @@ class HomeScreen : Screen {
             sheetElevation = 16.dp,
             sheetShape = RoundedCornerShape(16f)
         ) { paddingValues ->
-            Column(modifier = Modifier.padding(paddingValues)) {
+            Column(modifier = Modifier.padding(paddingValues).pointerInput(Unit) {
+                detectTapGestures(onTap = { closeKeyboardAndSheet() })
+            }) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,

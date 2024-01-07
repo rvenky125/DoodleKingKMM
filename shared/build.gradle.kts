@@ -1,3 +1,6 @@
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import java.util.Properties
+
 val ktorVersion = "2.2.4"
 
 plugins {
@@ -6,6 +9,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
+    id("com.codingfeline.buildkonfig") version "0.15.1"
 }
 
 fun composeDependency(groupWithArtifact: String) = "$groupWithArtifact:1.3.0"
@@ -60,8 +64,6 @@ kotlin {
                 api(Deps.Voyager.transitions)
                 api(Deps.Voyager.koin)
                 implementation(Deps.Napier.napier)
-
-//                implementation("com.russhwolf:multiplatform-settings:1.0.0")
                 implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
             }
         }
@@ -72,7 +74,6 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-//                implementation(Deps.Koin.android)
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
             }
         }
@@ -100,9 +101,23 @@ kotlin {
 
 android {
     namespace = "com.famas.doodlekingkmm"
-    compileSdk = 33
+    compileSdk = 34
     defaultConfig {
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
+    }
+}
+
+buildkonfig {
+    packageName = "com.famas.doodlekingkmm"
+
+    val localProps = Properties()
+    localProps.load(project.rootProject.file("local.properties").inputStream())
+    val baseUrl = localProps.getProperty("BASE_URL")
+    val webSocketUrl = localProps.getProperty("WEB_SOCKET_BASE_URL")
+
+    defaultConfigs {
+        buildConfigField(STRING, "BASE_URL", baseUrl)
+        buildConfigField(STRING, "WEB_SOCKET_BASE_URL", webSocketUrl)
     }
 }
