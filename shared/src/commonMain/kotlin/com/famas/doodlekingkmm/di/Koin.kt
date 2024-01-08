@@ -1,8 +1,19 @@
 package com.famas.doodlekingkmm.di
 
 import com.famas.doodlekingkmm.BuildKonfig
-import com.famas.doodlekingkmm.core.util.Constants
-import com.famas.doodlekingkmm.data.models.*
+import com.famas.doodlekingkmm.data.models.Announcement
+import com.famas.doodlekingkmm.data.models.BaseModel
+import com.famas.doodlekingkmm.data.models.ChatMessage
+import com.famas.doodlekingkmm.data.models.ChosenWord
+import com.famas.doodlekingkmm.data.models.DrawData
+import com.famas.doodlekingkmm.data.models.GameError
+import com.famas.doodlekingkmm.data.models.GameState
+import com.famas.doodlekingkmm.data.models.JoinRoom
+import com.famas.doodlekingkmm.data.models.NewWords
+import com.famas.doodlekingkmm.data.models.PhaseChange
+import com.famas.doodlekingkmm.data.models.Ping
+import com.famas.doodlekingkmm.data.models.PlayerData
+import com.famas.doodlekingkmm.data.models.PlayerList
 import com.famas.doodlekingkmm.data.remote.api.GameClient
 import com.famas.doodlekingkmm.data.remote.api.HomeScreenApi
 import com.famas.doodlekingkmm.data.remote.api.HomeScreenApiImpl
@@ -13,21 +24,19 @@ import com.famas.doodlekingkmm.domain.repositories.GameScreenRepo
 import com.famas.doodlekingkmm.domain.repositories.HomeScreenRepo
 import com.famas.doodlekingkmm.presentation.screen_game.GameScreenVM
 import com.famas.doodlekingkmm.presentation.screen_home.HomeScreenVM
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.SerialFormat
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
-import org.koin.core.context.startKoin
-import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
 fun getAllModules() = listOf(mainModule, platformModule)

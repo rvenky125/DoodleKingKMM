@@ -1,7 +1,5 @@
 package com.famas.doodlekingkmm.data.models
 
-import com.famas.doodlekingkmm.data.models.BaseModel
-import com.famas.doodlekingkmm.data.models.TYPE_NEW_WORDS
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -8,7 +8,6 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import cafe.adriel.voyager.navigator.Navigator
 import com.famas.doodlekingkmm.core.util.Constants
-import com.famas.doodlekingkmm.core.util.randomUUID
 import com.famas.doodlekingkmm.core.util.settings
 import com.famas.doodlekingkmm.data.models.Announcement
 import com.famas.doodlekingkmm.data.models.ChatMessage
@@ -31,8 +30,8 @@ import com.famas.doodlekingkmm.presentation.components.canvas.CanvasController
 import com.famas.doodlekingkmm.presentation.components.canvas.PathEvent
 import io.github.aakira.napier.Napier
 import io.ktor.util.date.GMTDate
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class GameScreenVM(
