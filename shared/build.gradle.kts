@@ -1,27 +1,26 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import java.util.Properties
 
-val ktorVersion = "2.2.4"
-
 plugins {
     kotlin("multiplatform")
     kotlin("native.cocoapods")
     id("com.android.library")
     id("org.jetbrains.compose")
     kotlin("plugin.serialization")
-    id("com.codingfeline.buildkonfig") version "0.15.1"
+    id("com.codingfeline.buildkonfig")
 }
 
 fun composeDependency(groupWithArtifact: String) = "$groupWithArtifact:1.3.0"
 
 kotlin {
-    android {
+    androidTarget {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "1.8"
             }
         }
     }
+
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -41,30 +40,32 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(compose.runtime)
-                api(compose.foundation)
-                api(compose.material3)
-                api(compose.material)
-                api(compose.materialIconsExtended)
-                api(compose.animation)
-                api(compose.animationGraphics)
-                api(compose.ui)
+                implementation(Deps.Kotlin.coroutines_core)
 
-                api("io.ktor:ktor-client-core:$ktorVersion")
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                api("io.ktor:ktor-client-logging:$ktorVersion")
-                api("io.ktor:ktor-client-websockets:$ktorVersion")
-                api("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-                api("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-                api("io.ktor:ktor-client-cio:$ktorVersion")
-                api(Deps.Koin.core)
-                api(Deps.Koin.compose)
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.material)
+                implementation(compose.materialIconsExtended)
+                implementation(compose.animation)
+                implementation(compose.animationGraphics)
+                implementation(compose.ui)
 
-                api(Deps.Voyager.navigator)
-                api(Deps.Voyager.transitions)
-                api(Deps.Voyager.koin)
+                implementation(Deps.Ktor.core)
+                implementation(Deps.Ktor.logging)
+                implementation(Deps.Ktor.webSockets)
+                implementation(Deps.Ktor.contentNegotiation)
+                implementation(Deps.Ktor.kotlinxJson)
+                implementation(Deps.Ktor.cioClient)
+
+                implementation(Deps.Koin.core)
+                implementation(Deps.Koin.compose)
+
+                implementation(Deps.Voyager.navigator)
+                implementation(Deps.Voyager.transitions)
+                implementation(Deps.Voyager.koin)
                 implementation(Deps.Napier.napier)
-                implementation("com.russhwolf:multiplatform-settings-no-arg:1.0.0")
+                implementation(Deps.MultiplatformSettings.noArg)
             }
         }
         val commonTest by getting {
@@ -74,7 +75,7 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                api("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+                implementation(Deps.AndroidX.viewmodelKtx)
             }
         }
         val androidUnitTest by getting
