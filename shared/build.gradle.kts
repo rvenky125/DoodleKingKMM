@@ -1,4 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import org.jetbrains.compose.ExperimentalComposeLibrary
 import java.util.Properties
 
 plugins {
@@ -50,6 +51,8 @@ kotlin {
                 implementation(compose.animation)
                 implementation(compose.animationGraphics)
                 implementation(compose.ui)
+                @OptIn(ExperimentalComposeLibrary::class)
+                implementation(compose.components.resources)
 
                 implementation(Deps.Ktor.core)
                 implementation(Deps.Ktor.logging)
@@ -103,9 +106,18 @@ kotlin {
 android {
     namespace = "com.famas.doodlekingkmm"
     compileSdk = 34
+
+    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
+
     defaultConfig {
         minSdk = 24
         targetSdk = 34
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 

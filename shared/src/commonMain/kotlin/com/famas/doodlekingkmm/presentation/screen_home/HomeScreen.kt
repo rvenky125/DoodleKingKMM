@@ -1,20 +1,24 @@
 package com.famas.doodlekingkmm.presentation.screen_home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -40,9 +44,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -50,12 +57,14 @@ import com.famas.doodlekingkmm.core.util.getScreenModel
 import com.famas.doodlekingkmm.presentation.components.NumberPicker
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
 class HomeScreen : Screen {
 
     @OptIn(
         ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
-        ExperimentalFoundationApi::class
+        ExperimentalFoundationApi::class, ExperimentalResourceApi::class
     )
     @Composable
     override fun Content() {
@@ -99,6 +108,17 @@ class HomeScreen : Screen {
             },
             snackbarHost = {
                 SnackbarHost(snackbarHostState)
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = {
+                    if (bottomSheetState.isCollapsed) {
+                        coroutineScope.launch {
+                            bottomSheetState.expand()
+                        }
+                    }
+                }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add room")
+                }
             },
             sheetContent = {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -188,34 +208,6 @@ class HomeScreen : Screen {
                     }
                 }
 
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .padding(vertical = 10.dp)
-                ) {
-                    Text(
-                        "Play with your friends by creating room here",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Button(onClick = {
-                        if (bottomSheetState.isCollapsed) {
-                            coroutineScope.launch {
-                                bottomSheetState.expand()
-                            }
-                        }
-                    }, modifier = Modifier.padding(top = 4.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Room",
-                            modifier = Modifier.padding(start = 0.dp)
-                        )
-                        Text(
-                            "Create Room",
-                            modifier = Modifier.padding(start = 5.dp)
-                        )
-                    }
-                }
-
                 LazyColumn(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
@@ -248,22 +240,34 @@ class HomeScreen : Screen {
                                     navigator
                                 )
                             )
-                        }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                            Column(
-                                modifier = Modifier.padding(
-                                    vertical = 10.dp,
-                                    horizontal = 15.dp
+                        }, modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(
+                                    painterResource("game_room.xml"),
+                                    contentDescription = "game room",
+                                    modifier = Modifier.height(42.dp)
+                                        .padding(start = 16.dp, end = 5.dp)
                                 )
-                            ) {
-                                Text(room.name, style = MaterialTheme.typography.titleMedium)
-                                Text(
-                                    "Max Players: " + room.maxPlayers,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    "Joined players: " + room.playerCount,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
+                                Column(
+                                    modifier = Modifier.padding(
+                                        vertical = 10.dp,
+                                        horizontal = 15.dp
+                                    )
+                                ) {
+                                    Text(
+                                        room.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        "Max Players: " + room.maxPlayers,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        "Joined players: " + room.playerCount,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
                         }
                     }
