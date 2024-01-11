@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -30,6 +29,7 @@ import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -111,23 +111,23 @@ class HomeScreen : Screen {
             },
             floatingActionButton = {
                 FloatingActionButton(onClick = {
-                    if (bottomSheetState.isCollapsed) {
-                        coroutineScope.launch {
+                    coroutineScope.launch {
+                        if (bottomSheetState.isCollapsed) {
                             bottomSheetState.expand()
+                        } else {
+                            bottomSheetState.collapse()
                         }
                     }
                 }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add room")
+                    if (bottomSheetState.isCollapsed) {
+                        Icon(Icons.Default.Add, contentDescription = "Add room")
+                    } else {
+                        Icon(Icons.Default.Close, contentDescription = "close")
+                    }
                 }
             },
             sheetContent = {
                 Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    IconButton(
-                        onClick = { closeKeyboardAndSheet() },
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = "close")
-                    }
                     OutlinedTextField(state.roomName, onValueChange = {
                         homeScreenModel.onEvent(HomeScreenEvent.OnChangeRoomName(it))
                     }, placeholder = {

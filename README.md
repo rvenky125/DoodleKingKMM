@@ -21,6 +21,7 @@ WEB_SOCKET_BASE_URL = ws://[IP_ADDRESS]:7000/
 ## Demo Video
 
 ## What's Next
+- Bug fixes 😅.
 - Some more UI improvement.
 - Add Authentication.
 - Password for joining room.
